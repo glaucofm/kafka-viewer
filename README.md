@@ -7,6 +7,7 @@ A tool to view and publish messages on Kafka. Currently it only supports JSON me
 ![Screenshot 3](./src/assets/images/screenshot3.png)
 ![Screenshot 4](./src/assets/images/screenshot4.png)
 ![Screenshot 5](./src/assets/images/screenshot5.png)
+![Screenshot 6](./src/assets/images/screenshot6.png)
 
 ## Initial setup
 
