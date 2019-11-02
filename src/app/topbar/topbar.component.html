@@ -1,0 +1,205 @@
+<div class="topbar">
+
+    <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+
+            <li class="pure-menu-item">
+                <div class="dropdown hover" id="menu-connections">
+
+                    <a class="pure-menu-link" *ngIf="kafkaService.connections">
+                        <ng-container *ngIf="kafkaService.isAnythingConnected()">
+                            <i class="fas fa-link"></i> {{ kafkaService.getActiveConnectionsNames() }}
+                        </ng-container>
+                        <ng-container *ngIf="!kafkaService.isAnythingConnected()">
+                            <i class="fas fa-plug"></i> Connect...
+                        </ng-container>
+                    </a>
+
+                    <div class="dropdown-content dropdown-connections">
+                        <table>
+                            <tr *ngFor="let connection of kafkaService.connections">
+                                <td>
+                                    <a (click)="kafkaService.connect(connection)" [class.connected]="connection.isConnected" *ngIf="!connection.isConnected">
+                                        {{ connection.name }}
+                                    </a>
+                                    <a [class.connected]="connection.isConnected" *ngIf="connection.isConnected">
+                                        {{ connection.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <ng-container *ngIf="connection.isConnected">
+                                        <a (click)="kafkaService.disconnect(connection)" class="disconnect"><i class="fas fa-unlink"></i></a>
+                                    </ng-container>
+                                </td>
+                                <td>
+                                    <a (click)="editConnection(connection)" class="edit"><i class="far fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <a (click)="editConnection()" class="add"><i class="fas fa-plus"></i> Add Connection</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <app-modal *ngIf="!!editingConnection" [visible]="true" (closeModal)="editingConnection = null" [margin]="'10px'">
+                        <div body>
+                            <form class="pure-form pure-form-stacked" (ngSubmit)="saveConnection()">
+                                <fieldset>
+                                    <label for="brokers">Brokers</label>
+                                    <input id="brokers" name="newConnection.brokers" type="text" class="pure-input-1" [(ngModel)]="editingConnection.brokers" placeholder="192.168.1.1:9092,192.168.1.2:9092,...">
+                                    <label for="name">Name</label>
+                                    <input id="name" name="newConnection.name" type="text" class="pure-input-1" [(ngModel)]="editingConnection.name" placeholder="Give it a ame to identify it here">
+                                    <button type="submit" class="pure-button pure-button-primary">Save</button>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </app-modal>
+                </div>
+            </li>
+
+            <li class="pure-menu-item" *ngIf="kafkaService.isAnythingConnected()">
+                <div class="dropdown hover" id="menu-topics">
+
+                    <a class="pure-menu-link" style="vertical-align: middle">
+                        <ng-container *ngIf="kafkaService.getNumOfTopics() > 0">
+                            <i class="fas fa-list-ul"></i> Topics
+                            <ng-container *ngIf="kafkaService.getNumTopicsSelected() > 0">
+                                ({{ kafkaService.getNumTopicsSelected() }})
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="kafkaService.getNumOfTopics() == 0">
+                            <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px"> Topics
+                        </ng-container>
+                    </a>
+
+                    <div class="dropdown-content" *ngIf="kafkaService.getNumOfTopics() > 0" id="menu-topic-content">
+                        <table class="topic-list">
+                            <ng-container *ngFor="let connection of kafkaService.activeConnections">
+                                <tr>
+                                    <td class="connection" colspan="3">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <span class="item">
+                                                        {{ connection.name }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a (click)="toggleUnselectedTopicsOpen(connection)" class="toggle" style="margin-left: -10px">
+                                                        <i class="far fa-plus-square"
+                                                           [class.fa-plus-square]="!areUnselectedTopicsOpen(connection)"
+                                                           [class.fa-minus-square]="areUnselectedTopicsOpen(connection)">
+                                                        </i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <ng-container *ngFor="let status of ['selected', 'unselected']">
+                                    <ng-container  *ngIf="status == 'selected' || areUnselectedTopicsOpen(connection)">
+                                        <tr *ngFor="let topic of getTopics(connection, status == 'selected')" class="{{ status }}">
+                                            <td style="min-width: 20px">
+                                                &nbsp;
+                                            </td>
+                                            <td>
+                                                <a (click)="toggleTopic(connection, topic)" class="topic-name">
+                                                    {{ topic.name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a (click)="openPublishModal(connection, topic)" class="publish">
+                                                    <i class="fas fa-share-square"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </table>
+                    </div>
+
+                </div>
+            </li>
+
+            <li class="pure-menu-item">
+                <div class="dropdown hover" id="menu-columns">
+
+                    <a class="pure-menu-link">
+                        <i class="fas fa-grip-vertical"></i> Columns
+                    </a>
+
+                    <div class="dropdown-content" id="menu-columns-content">
+                        <table class="columns">
+                            <tr>
+                                <th>Name</th>
+                                <th>Json Path</th>
+                                <th></th>
+                            </tr>
+                            <ng-container *ngFor="let column of columns; let first = first; let last = last">
+                                <tr>
+                                    <td class="col-name">
+                                        <ng-container *ngIf="!column.isUserDefined">
+                                            {{ column.name }}
+                                        </ng-container>
+                                        <ng-container *ngIf="column.isUserDefined">
+                                            <input type="text" class="pure-input-1" [(ngModel)]="column.name" placeholder="Column name">
+                                        </ng-container>
+                                    </td>
+                                    <td class="col-json">
+                                        <ng-container *ngIf="column.isUserDefined">
+                                            <input type="text" class="pure-input-1" [(ngModel)]="column.jsonPath" placeholder="Json path: $.field.field...">
+                                        </ng-container>
+                                    </td>
+                                    <td class="col-buttons">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <a class="enable" (click)="column.isEnabled = !column.isEnabled" [class.enabled]="column.isEnabled" [class.disabled]="!column.isEnabled">
+                                                        <i class="far" [class.fa-square]="!column.isEnabled" [class.fa-check-square]="column.isEnabled"></i>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <a (click)="moveColumnUp(column)" *ngIf="!first" class="move-up"><i class="fas fa-chevron-up"></i></a>
+                                                    <div class="first" *ngIf="first"></div>
+                                                </td>
+                                                <td>
+                                                    <a (click)="moveColumnDown(column)" *ngIf="!last"><i class="fas fa-chevron-down"></i></a>
+                                                </td>
+                                                <td>
+                                                    <a class="remove" (click)="removeColumn(column)" *ngIf="column.isUserDefined"><i class="far fa-trash-alt"></i></a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                            <tr class="add-column">
+                                <td>
+                                    <a (click)="addColumn()"><i class="fas fa-plus"></i> Add column</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </li>
+
+        </ul>
+    </div>
+
+</div>
+
+<app-modal *ngIf="!!publishDetails.topic" [visible]="true" (closeModal)="publishDetails.topic = null" [width]="'900px'">
+    <div title>
+        Publish message to topic {{ publishDetails.topic.name }} connection {{ publishDetails.connection.name }}
+    </div>
+    <div body>
+        <textarea class="pure-input-1 publish" rows="30" [(ngModel)]="publishDetails.message"></textarea>
+    </div>
+    <div footer>
+        <button type="submit" class="pure-button pure-button-primary" (click)="publish()">Publish</button>
+    </div>
+</app-modal>

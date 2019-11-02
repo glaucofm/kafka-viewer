@@ -1,0 +1,15 @@
+<button
+        type="button"
+        class="{{ getButtonClass() }}"
+        [disabled]="disabled"
+        (click)="myclick()">
+
+    <ng-container *ngIf="!isLoading() && getIconClass()">
+        <i [ngClass]="getIconClass()"
+           [class.no-text]="!text"></i>
+    </ng-container>
+    {{text}}
+    <ng-container *ngIf="isLoading()">
+        <img src="/assets/images/spinner-icon-0.gif" height="20px">
+    </ng-container>
+</button>

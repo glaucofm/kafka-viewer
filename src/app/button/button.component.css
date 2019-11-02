@@ -1,0 +1,24 @@
+button {
+    background-color: transparent;
+    padding: 5px 10px;
+    font-family: Roboto, monospace;
+    font-size: 14px;
+    border: 1px solid grey;
+    border-radius: 3px;
+}
+
+button.default {
+    background-color: #154360;
+    border: 1px solid #154360;
+    color: white;
+}
+
+button.default:hover {
+    background-color: #1F618D;
+    border: 1px solid #1F618D;
+    color: white;
+}
+
+button.pad-right {
+    margin-right: 10px;
+}

@@ -1,0 +1,97 @@
+<div *ngIf="kafkaService.getNumTopicsSelected() > 0" class="message-box">
+
+    <table class="pure-table">
+        <tr>
+            <ng-container *ngFor="let column of columns">
+                <ng-container *ngIf="column.isEnabled">
+                    <th id="column-{{ column.name }}" (click)="stepWidth(column)"
+                        class="{{ (column.width? 'width-' + column.width : '') }} {{ column.isResizable? 'resizable' : '' }}">
+                        {{ column.name }}
+                    </th>
+                </ng-container>
+            </ng-container>
+        </tr>
+
+        <ng-container *ngFor="let message of messages">
+            <tr [class.new]="isNewMessage(message)">
+
+                <ng-container *ngIf="['subscribed-to-topic', 'messages-to-fetch'].indexOf(message.type) >= 0">
+                    <td class="connection">{{ message.connection }}</td>
+                    <td class="topic">{{ message.topic }}</td>
+                    <td class="notification" [attr.colspan]="getNumberOfColumns() - 2">
+                        <ng-container *ngIf="message.type == 'subscribed-to-topic'">
+                            Loading messages of topic {{ message.topic }} from connection {{ message.connection }}... <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
+                        </ng-container>
+                        <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages > 0">
+                            Loading {{ message.userValues.numOfMessages }} messages of topic {{ message.topic }} from connection {{ message.connection }}... <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
+                        </ng-container>
+                        <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages == 0">
+                            <span class="no-messages">
+                                No messages
+                            </span>
+                        </ng-container>
+                    </td>
+                </ng-container>
+
+                <ng-container *ngIf="message.type == 'message'">
+                    <ng-container *ngFor="let column of columns">
+                        <ng-container *ngIf="column.isEnabled" [ngSwitch]="column.name">
+
+                            <td *ngSwitchCase="'Connection'" [className]="column.width? 'connection width-' + column.width : 'connection'">{{ message.connection }}</td>
+
+                            <td *ngSwitchCase="'Topic'" [className]="column.width? 'topic width-' + column.width : 'topic'">
+                                {{ message.topic }}
+                            </td>
+
+                            <td *ngSwitchCase="'Size'" [className]="column.width? 'size width-' + column.width : 'size'">{{ message.formattedSize }}</td>
+
+                            <td *ngSwitchCase="'Published'" [className]="column.width? 'time width-' + column.width : 'time'"
+                                (click)="showTimeAgo = !showTimeAgo" [style.cursor]="'pointer'">
+                                <ng-container *ngIf="showTimeAgo">
+                                    {{ message.timestamp | amTimeAgo }}
+                                </ng-container>
+                                <ng-container *ngIf="!showTimeAgo">
+                                    {{ message.formattedTimestamp }}
+                                </ng-container>
+                            </td>
+
+                            <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200">
+                                <ng-container *ngIf="!message.json && !message.formattedJson">
+                                    <span class="show-json" (click)="viewJSON(message)">
+                                        JSON
+                                    </span>
+                                    <span class="show-formatted" (click)="viewFormatted(message)">
+                                        Formatted
+                                    </span>
+                                            {{ message.payload }}
+                                </ng-container>
+                                <ng-container *ngIf="!!message.json">
+                                    <span class="close-json" (click)="message.json = null">
+                                        Close
+                                    </span>
+                                    <ngx-json-viewer [json]="message.json" [expanded]="false"></ngx-json-viewer>
+                                </ng-container>
+                                <ng-container *ngIf="!!message.formattedJson">
+                                    <span class="close-formatted" (click)="message.formattedJson = null">
+                                        Close
+                                    </span>
+                                    <span class="copy-formatted" (click)="copyToClipboard(message)">
+                                        Copy <span class="copy-message" *ngIf="showCopyMessage">(Text copied)</span>
+                                    </span>
+                                    <pre>{{ message.formattedJson }}</pre>
+                                </ng-container>
+                            </td>
+
+                            <td *ngIf="column.isUserDefined" [className]="column.width? 'user width-' + column.width : 'user'">
+                                {{ message.userValues[column.name] }}
+                            </td>
+
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+            </tr>
+        </ng-container>
+
+    </table>
+
+</div>

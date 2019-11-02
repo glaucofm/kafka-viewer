@@ -1,0 +1,109 @@
+div.message-box {
+    padding: 0px 20px 20px 20px;
+}
+
+div.message-box table {
+    width: 100%;
+}
+
+div.message-box tr.new {
+    background-color: lightyellow;
+}
+
+td.connection, td.topic, td.time, td.size {
+    width: 1px;
+    white-space: nowrap;
+}
+
+td.payload {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+td.user {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 1px;
+}
+
+td.time span.ago, td.time span.formatted:hover {
+    display: block
+}
+
+td.time span.ago:hover, td.time span.formatted {
+    display: none
+}
+
+td.payload span.show-json, td.payload span.show-formatted {
+    display: none;
+}
+
+td.payload:hover span.show-json, td.payload:hover span.show-formatted {
+    display: block;
+}
+
+span.show-json, span.show-formatted {
+    float: left;
+    color: gray;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+span.close-json, span.close-formatted, span.copy-formatted {
+    float: left;
+    color: gray;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+span.show-json:hover, span.show-formatted:hover, span.close-json:hover, span.close-formatted:hover {
+    color: blue;
+}
+
+span.copy-formatted:hover {
+    color: green;
+}
+
+span.copy-message, span.copy-message:hover {
+    color: dimgray;
+}
+
+td.payload pre {
+    clear: both;
+}
+
+textarea.to-copy {
+    display: none
+}
+
+th.resizable {
+    cursor: pointer;
+}
+
+th.resizable:hover {
+    color: blue
+}
+
+.width-500, .width-400, .width-300, .width-250, .width-200, .width-150, .width-100, .width-75, .width-50, .width-25 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: rtl;
+}
+
+.width-500 { width: 500px; max-width: 500px; }
+.width-400 { width: 400px; max-width: 400px; }
+.width-300 { width: 300px; max-width: 300px; }
+.width-250 { width: 250px; max-width: 250px; }
+.width-200 { width: 200px; max-width: 20px; }
+.width-150 { width: 150px; max-width: 150px; }
+.width-100 { width: 100px; max-width: 100px; }
+.width-75 { width: 75px; max-width: 75px; }
+.width-50 { width: 50px; max-width: 50px; }
+.width-25 { width: 25px; max-width: 25px; }
+
+span.no-messages {
+    color: lightgray;
+}

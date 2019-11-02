@@ -1,0 +1,14 @@
+<div [@modal] *ngIf="visible" class="modal" (click)="close()">
+    <div class="modal-content" (click)="stopBubbling($event)"
+         [style.margin]="margin" [style.width]="width">
+        <div class="modal-title">
+            <ng-content select="[title]"></ng-content>
+        </div>
+        <div class="modal-body">
+            <ng-content select="[body]"></ng-content>
+        </div>
+        <div class="modal-footer">
+            <ng-content select="[footer]"></ng-content>
+        </div>
+    </div>
+</div>

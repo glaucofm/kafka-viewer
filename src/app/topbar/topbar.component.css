@@ -1,0 +1,165 @@
+div.topbar {
+    padding: 10px;
+}
+
+select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid navy;
+    width: 250px;
+    border-radius: 3px;
+}
+
+
+form button {
+    margin-top: 10px;
+}
+
+div.dropdown-content.connect-dropdown {
+    width: 600px;
+    padding: 20px;
+}
+
+.pure-form label {
+    margin: 0px;
+}
+
+.pure-form-stacked input {
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+a {
+    cursor: pointer;
+}
+
+.dropdown-content span.item {
+    color: black;
+    padding: 6px 12px;
+    display: block;
+}
+
+div.dropdown-connections a.edit, div.dropdown-connections a.disconnect, div.dropdown-connections a.add {
+    background-color: transparent;
+    padding: 6px 10px;
+}
+
+div.dropdown-connections a.edit, div.dropdown-connections a.disconnect {
+    margin-left: 10px;
+}
+
+div.dropdown-connections a.edit:hover, div.dropdown-connections a.add:hover {
+    background-color: transparent;
+    color: blue;
+}
+
+div.dropdown-connections a.disconnect:hover {
+    background-color: transparent;
+    color: red;
+}
+
+div.dropdown-connections a.connected {
+    color: blue;
+}
+
+div.dropdown-connections a.connected:hover {
+    background-color: transparent;
+}
+
+table.topic-list tr.selected a.topic-name {
+    color: blue;
+}
+
+table.topic-list a.publish, table.topic-list a.toggle {
+    background-color: white;
+    color: gray;
+}
+
+table.topic-list a.publish:hover, table.topic-list a.toggle:hover {
+    background-color: white;
+    color: blue;
+}
+
+table.columns {
+    margin: 20px;
+}
+
+table.columns th {
+    padding-bottom: 10px;
+}
+
+table.columns tr:hover {
+    background-color: #fafafa;
+}
+
+table.columns td {
+    padding: 1px 0px;
+}
+
+table.columns input {
+    border: 1px solid lightgrey;
+    padding: 2px 6px;
+    margin-right: 20px;
+}
+
+table.columns td.col-name input {
+    min-width: 150px;
+    border-radius: 2px;
+}
+
+table.columns td.col-json input {
+    min-width: 300px;
+    border-radius: 2px;
+}
+
+table.columns td.col-buttons a {
+    padding: 0px 0px;
+    color: lightgrey;
+    margin-right: 10px;
+}
+
+table.columns td.col-buttons a.enable.disabled {
+    color: lightgrey;
+}
+
+table.columns td.col-buttons a.enable.enabled {
+    color: black;
+}
+
+table.columns td.col-buttons a:hover, table.columns td.col-buttons a.enable:hover {
+    background-color: #f8f8f8;
+    color: blue;
+}
+
+table.columns td.col-buttons a.remove:hover {
+    color: red;
+}
+
+table.columns td.col-buttons a i {
+    font-size: 20px;
+}
+
+table.columns td.col-buttons div.first {
+    min-width: 23px;
+}
+
+table.columns td.col-buttons a.move-up {
+    margin-right: 5px;
+}
+
+table.columns tr.add-column a {
+    background-color: transparent;
+    padding: 2px 0px 0px 0px;
+    color: grey;
+}
+
+table.columns tr.add-column a:hover {
+    color: blue;
+}
+
+textarea.publish {
+    width: 100%;
+    border: solid 1px gray;
+    border-radius: 2px;
+    font-family: Consolas, 'Courier New', monospace;
+}
