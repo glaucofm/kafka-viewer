@@ -1,6 +1,6 @@
 # kafka-viewer
 
-A tool to view and publish messages on Kafka. Currently it only supports JSON messages.
+A tool to view and publish JSON messages on Kafka.
 
 ## Download and execute
 
