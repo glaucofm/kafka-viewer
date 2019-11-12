@@ -1,6 +1,13 @@
 # kafka-viewer
 
-A tool to view and publish messages on Kafka. Currently it only supports JSON messages.
+A tool to view and publish JSON messages on Kafka.
+
+## Download and execute
+
+- Download zip with windows distribution/executable from https://glaucotools.s3-sa-east-1.amazonaws.com/kafka-viewer.zip
+- Unzip on %APPDATA% folder and execute kafka-viewer.exe
+
+## Screenshots
 
 ![Screenshot 7](./src/assets/images/screenshot7.png)
 ![Screenshot 8](./src/assets/images/screenshot8.png)
