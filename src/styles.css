@@ -31,8 +31,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     display: block;
 }
 
-/* Change color of dropdown links on hover */
-.dropdown-content a:hover {
+.dropdown-content a:hover, .dropdown:hover .dropbtn, .dropdown:hover a.pure-menu-link {
     background-color: #eee;
 }
 
@@ -43,11 +42,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .dropdown.hover:hover .dropdown-content {
     display: block;
-}
-
-/* Change the background color of the dropdown button when the dropdown content is shown */
-.dropdown:hover .dropbtn {
-    background-color: #eee;
 }
 
 .pure-form input[type=color], .pure-form input[type=date], .pure-form input[type=datetime-local], .pure-form input[type=datetime], .pure-form input[type=email], .pure-form input[type=month], .pure-form input[type=number], .pure-form input[type=password], .pure-form input[type=search], .pure-form input[type=tel], .pure-form input[type=text], .pure-form input[type=time], .pure-form input[type=url], .pure-form input[type=week], .pure-form select, .pure-form textarea {
@@ -64,4 +58,53 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     margin: 0;
     overflow: visible;
     padding: 3px 10px;
+}
+
+/*
+    Dark theme
+ */
+
+.dark-theme {
+    color: #bbb;
+    background-color: #2B2B2B;
+}
+
+.dark-theme .pure-menu-link {
+    color: #bbb;
+}
+
+.dark-theme .pure-menu-active>.pure-menu-link, .dark-theme .pure-menu-link:focus, .dark-theme .dropdown:hover, .dark-theme .pure-menu-link:hover {
+    background-color: #3C3F41;
+}
+
+.dark-theme .dropdown-content {
+    color: #bbb;
+    background-color: #3C3F41;
+    box-shadow: inherit;
+}
+
+.dark-theme .dropdown-content a {
+    color: #bbb;
+}
+
+.dark-theme .dropdown a:hover {
+    color: #fff;
+}
+
+.dark-theme .dropdown-content a:hover, .dark-theme .dropdown:hover a.pure-menu-link {
+    background-color: #3C3F41;
+}
+
+.dark-theme .ngx-json-viewer .segment .segment-main .segment-key {
+    color: lightgreen !important;
+}
+
+.dark-theme .pure-button-primary, .dark-theme .pure-button-selected, .dark-theme a.pure-button-primary, .dark-theme a.pure-button-selected {
+    background-color: #365880;
+    color: #ddd;
+}
+
+.dark-theme .pure-button-primary:hover, .dark-theme .pure-button-selected:hover, .dark-theme a.pure-button-primary:hover, .dark-theme a.pure-button-selected:hover {
+    background-color: #365880;
+    color: #fff;
 }

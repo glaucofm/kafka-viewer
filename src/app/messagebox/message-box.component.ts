@@ -6,6 +6,7 @@ import {NgxJsonViewerComponent} from 'ngx-json-viewer';
 import {EventService} from "../service/event.service";
 import * as jsonPath from 'jsonpath';
 import {StorageService} from "../service/storage.service";
+import {ConfigurationService} from "../service/configuration.service";
 
 
 @Component({
@@ -15,17 +16,19 @@ import {StorageService} from "../service/storage.service";
 })
 export class MessageBoxComponent {
 
+    public kafkaService: KafkaService;
+    public configurationService: ConfigurationService;
     public messages: RowMessage[] = [];
     public showTimeAgo = true;
-    public kafkaService: KafkaService;
     public showCopyMessage = false;
     public columns: Column[] = MessageBoxComponent.getInitialColumns();
     private widthSteps = [100, 25, 0];
 
     @ViewChildren(NgxJsonViewerComponent) components: QueryList<NgxJsonViewerComponent>;
 
-    constructor(kafkaService: KafkaService) {
+    constructor(kafkaService: KafkaService, configurationService: ConfigurationService) {
         this.kafkaService = kafkaService;
+        this.configurationService = configurationService;
 
         if (StorageService.get('columns')) {
             this.columns = StorageService.get('columns');
@@ -38,6 +41,9 @@ export class MessageBoxComponent {
                     this.insertMessage(event.data.connection, message);
                 }
                 this.messages.sort((a, b) => a.timestamp == b.timestamp? 0 : a.timestamp > b.timestamp? 1 : -1).reverse();
+                if (this.messages.length > this.configurationService.config.numberOfMessagesOnScreen) {
+                    this.messages = this.messages.slice(0, this.configurationService.config.numberOfMessagesOnScreen);
+                }
             } else if (event.type === 'remove-topic') {
                 this.messages = this.messages.filter(x => x.topic !== event.data);
             } else if (event.type === 'disconnect') {

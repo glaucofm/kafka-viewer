@@ -2,16 +2,17 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {StorageService} from './storage.service';
 import {ApplicationEvent, KafkaConnection, Topic} from '../model/types';
 import {EventService} from "./event.service";
+import {ConfigurationService} from "./configuration.service";
 
 @Injectable()
 export class KafkaService {
 
     public connections: KafkaConnection[] = [];
     public activeConnections: KafkaConnection[] = [];
+    public configurationService: ConfigurationService;
 
-    private maxMessages = 200;
-
-    constructor() {
+    constructor(configurationService: ConfigurationService) {
+        this.configurationService = configurationService;
         this.connections = StorageService.get('connections');
         if (!this.connections) {
             this.connections = [];
@@ -97,7 +98,7 @@ export class KafkaService {
         EventService.emitter.emit({ type: 'subscribed-to-topic', data: { topic: topic } });
 
         let offsets = await this.getJson('offsets', '?name=' + connection.name + '&topic=' + topic.name);
-        let maxByPartition = Math.round(this.maxMessages / offsets.length);
+        let maxByPartition = Math.round(this.configurationService.config.numberOfMessagesPerTopic / offsets.length);
 
         let totalMessagesToFetch = offsets
             .map(offset => { return offset.end - Math.max(offset.start, offset.end - maxByPartition); })

@@ -1,18 +1,20 @@
-import {Component} from '@angular/core';
+import {Component, ViewEncapsulation} from '@angular/core';
 import {KafkaService} from '../service/kafka.service';
 import {Column, KafkaConnection, Topic} from '../model/types';
 import {StorageService} from '../service/storage.service';
 import {MessageBoxComponent} from "../messagebox/message-box.component";
 import {EventService} from "../service/event.service";
+import {ConfigurationService} from "../service/configuration.service";
 
 @Component({
     selector: 'app-topbar',
     templateUrl: './topbar.component.html',
-    styleUrls: ['./topbar.component.css'],
+    styleUrls: ['./topbar.component.css']
 })
 export class TopbarComponent {
 
     public kafkaService: KafkaService;
+    public configurationService: ConfigurationService;
     public editingConnection: KafkaConnection;
     public oldConnection: KafkaConnection;
     public columns: Column[] = MessageBoxComponent.getInitialColumns();
@@ -33,8 +35,10 @@ export class TopbarComponent {
         message: null
     };
 
-    constructor(kafkaService: KafkaService) {
+    constructor(kafkaService: KafkaService, configurationService: ConfigurationService) {
         this.kafkaService = kafkaService;
+        this.configurationService = configurationService;
+
         if (StorageService.get('columns')) {
             this.columns = StorageService.get('columns');
         }
@@ -151,5 +155,9 @@ export class TopbarComponent {
 
     removeColumn(column: Column) {
         this.columns = this.columns.filter(x => x.name !== column.name);
+    }
+
+    setTheme(theme) {
+        this.configurationService.setTheme({ name: theme });
     }
 }

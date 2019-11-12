@@ -1,4 +1,4 @@
-<div *ngIf="kafkaService.getNumTopicsSelected() > 0" class="message-box">
+<div *ngIf="kafkaService.getNumTopicsSelected() > 0" [class.message-box]="true" [class.dark-theme]="configurationService.theme == 'dark'">
 
     <table class="pure-table">
         <tr>

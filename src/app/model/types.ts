@@ -13,7 +13,7 @@ export interface Topic {
 }
 
 export interface ApplicationEvent {
-    type: 'message' | 'end-messages' | 'remove-topic' | 'disconnect' | 'columns' | 'columns-modified' | 'subscribed-to-topic' | 'messages-to-fetch',
+    type: 'message' | 'end-messages' | 'remove-topic' | 'disconnect' | 'columns' | 'columns-modified' | 'subscribed-to-topic' | 'messages-to-fetch' | 'theme',
     data?: any
 }
 

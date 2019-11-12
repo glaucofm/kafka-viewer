@@ -39,6 +39,10 @@ a {
     display: block;
 }
 
+.dark-theme .dropdown-content span.item {
+    color: #ccc;
+}
+
 div.dropdown-connections a.edit, div.dropdown-connections a.disconnect, div.dropdown-connections a.add {
     background-color: transparent;
     padding: 6px 10px;
@@ -53,6 +57,11 @@ div.dropdown-connections a.edit:hover, div.dropdown-connections a.add:hover {
     color: blue;
 }
 
+.dark-theme div.dropdown-connections a.edit:hover, .dark-theme div.dropdown-connections a.add:hover {
+    background-color: transparent;
+    color: deepskyblue;
+}
+
 div.dropdown-connections a.disconnect:hover {
     background-color: transparent;
     color: red;
@@ -62,12 +71,28 @@ div.dropdown-connections a.connected {
     color: blue;
 }
 
+.dark-theme div.dropdown-connections a.connected, .dark-theme div.dropdown-connections a.disconnected:hover {
+    color: deepskyblue;
+}
+
 div.dropdown-connections a.connected:hover {
     background-color: transparent;
 }
 
 table.topic-list tr.selected a.topic-name {
     color: blue;
+}
+
+table.topic-list tr.unselected a.topic-name:hover {
+    color: blue;
+}
+
+.dark-theme table.topic-list tr.selected a.topic-name {
+    color: deepskyblue;
+}
+
+.dark-theme table.topic-list tr.unselected a.topic-name:hover {
+    color: deepskyblue;
 }
 
 table.topic-list a.publish, table.topic-list a.toggle {
@@ -80,16 +105,22 @@ table.topic-list a.publish:hover, table.topic-list a.toggle:hover {
     color: blue;
 }
 
+.dark-theme table.topic-list a.publish, .dark-theme table.topic-list a.toggle {
+    background-color: transparent;
+    color: #888;
+}
+
+.dark-theme table.topic-list a.publish:hover, .dark-theme table.topic-list a.toggle:hover {
+    background-color: transparent;
+    color: deepskyblue;
+}
+
 table.columns {
     margin: 20px;
 }
 
 table.columns th {
     padding-bottom: 10px;
-}
-
-table.columns tr:hover {
-    background-color: #fafafa;
 }
 
 table.columns td {
@@ -118,6 +149,10 @@ table.columns td.col-buttons a {
     margin-right: 10px;
 }
 
+.dark-theme table.columns td.col-buttons a {
+    color: #aaa;
+}
+
 table.columns td.col-buttons a.enable.disabled {
     color: lightgrey;
 }
@@ -126,9 +161,28 @@ table.columns td.col-buttons a.enable.enabled {
     color: black;
 }
 
+.dark-theme table.columns td.col-buttons a.enable.disabled {
+    color: #aaa;
+}
+
+.dark-theme table.columns td.col-buttons a.enable.enabled {
+    color: #eee;
+}
+
+.dark-theme input, .dark-theme textarea {
+    background-color: #222;
+    color: #ccc;
+    border: 1px solid #888
+}
+
 table.columns td.col-buttons a:hover, table.columns td.col-buttons a.enable:hover {
     background-color: #f8f8f8;
     color: blue;
+}
+
+.dark-theme table.columns td.col-buttons a:hover, .dark-theme table.columns td.col-buttons a.enable:hover {
+    background-color: transparent;
+    color: deepskyblue;
 }
 
 table.columns td.col-buttons a.remove:hover {
@@ -157,9 +211,54 @@ table.columns tr.add-column a:hover {
     color: blue;
 }
 
+.dark-theme table.columns tr.add-column a {
+    color: #ddd;
+}
+
+.dark-theme table.columns tr.add-column a:hover {
+    color: deepskyblue;
+}
+
 textarea.publish {
     width: 100%;
     border: solid 1px gray;
     border-radius: 2px;
     font-family: Consolas, 'Courier New', monospace;
+}
+
+.menu-config .dropdown-content {
+    padding: 20px;
+    padding-top: 10px;
+}
+
+.menu-config .themes span, .dark-theme .menu-config .themes span {
+    color: inherit;
+}
+
+.menu-config .themes span:hover, .menu-config .themes span.selected {
+    color: blue;
+}
+
+.menu-config .themes span.unselected {
+    cursor: pointer;
+}
+
+.dark-theme .menu-config .themes span, .dark-theme .dark-theme .menu-config .themes span {
+    color: inherit;
+}
+
+.dark-theme .menu-config .themes span:hover, .dark-theme .menu-config .themes span.selected {
+    color: deepskyblue;
+}
+
+.menu-config .themes span.left {
+    margin-right: 10px;
+}
+
+.menu-config .themes .label {
+    margin-bottom: 5px;
+}
+
+.menu-config .row {
+    margin-top: 10px;
 }

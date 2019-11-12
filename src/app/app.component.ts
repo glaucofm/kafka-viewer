@@ -1,6 +1,7 @@
 import {Component, enableProdMode} from '@angular/core';
 
 enableProdMode();
+// setTheme();
 
 @Component({
     selector: 'app-root',
@@ -8,5 +9,6 @@ enableProdMode();
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    title = 'kafka-viewer';
+    public title = 'kafka-viewer';
 }
+

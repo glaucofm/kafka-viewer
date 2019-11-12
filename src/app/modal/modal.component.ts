@@ -1,5 +1,6 @@
 import {Component, OnInit, Input, Output, OnChanges, EventEmitter, HostListener} from '@angular/core';
 import {trigger, state, style, animate, transition } from '@angular/animations';
+import {ConfigurationService} from "../service/configuration.service";
 
 @Component({
     selector: 'app-modal',
@@ -25,7 +26,12 @@ export class ModalComponent implements OnInit {
 
     @Output() closeModal = new EventEmitter();
 
-    constructor() { }
+    public configurationService: ConfigurationService;
+
+    constructor(configurationService: ConfigurationService) {
+        this.configurationService = configurationService;
+    }
+
     ngOnInit() { }
 
     close() {

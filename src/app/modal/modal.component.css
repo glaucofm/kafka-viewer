@@ -26,3 +26,7 @@
     margin-bottom: 10px;
 }
 
+.dark-theme .modal-content {
+    background-color: #3C3F41;
+}
+

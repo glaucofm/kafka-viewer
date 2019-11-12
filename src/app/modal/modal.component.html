@@ -1,4 +1,4 @@
-<div [@modal] *ngIf="visible" class="modal" (click)="close()">
+<div [@modal] *ngIf="visible" (click)="close()" [class.modal]="true" [class.dark-theme]="configurationService.theme === 'dark'">
     <div class="modal-content" (click)="stopBubbling($event)"
          [style.margin]="margin" [style.width]="width">
         <div class="modal-title">

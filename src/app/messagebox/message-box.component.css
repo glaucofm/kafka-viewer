@@ -10,6 +10,10 @@ div.message-box tr.new {
     background-color: lightyellow;
 }
 
+div.message-box.dark-theme tr.new {
+    background-color: #660;
+}
+
 td.connection, td.topic, td.time, td.size {
     width: 1px;
     white-space: nowrap;
@@ -62,8 +66,16 @@ span.show-json:hover, span.show-formatted:hover, span.close-json:hover, span.clo
     color: blue;
 }
 
+.dark-theme span.show-json:hover, .dark-theme span.show-formatted:hover, .dark-theme span.close-json:hover, .dark-theme span.close-formatted:hover {
+    color: deepskyblue;
+}
+
 span.copy-formatted:hover {
     color: green;
+}
+
+.dark-theme span.copy-formatted:hover {
+    color: lightgreen;
 }
 
 span.copy-message, span.copy-message:hover {

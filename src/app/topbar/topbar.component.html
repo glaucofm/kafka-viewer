@@ -1,4 +1,4 @@
-<div class="topbar">
+<div [class.topbar]="true" [class.dark-theme]="configurationService.theme == 'dark'">
 
     <div class="pure-menu pure-menu-horizontal">
         <ul class="pure-menu-list">
@@ -19,10 +19,10 @@
                         <table>
                             <tr *ngFor="let connection of kafkaService.connections">
                                 <td>
-                                    <a (click)="kafkaService.connect(connection)" [class.connected]="connection.isConnected" *ngIf="!connection.isConnected">
+                                    <a (click)="kafkaService.connect(connection)" *ngIf="!connection.isConnected" [class.disconnected]="true">
                                         {{ connection.name }}
                                     </a>
-                                    <a [class.connected]="connection.isConnected" *ngIf="connection.isConnected">
+                                    <a *ngIf="connection.isConnected" [class.connected]="true">
                                         {{ connection.name }}
                                     </a>
                                 </td>
@@ -187,12 +187,48 @@
                 </div>
             </li>
 
+            <li class="pure-menu-item menu-config">
+                <div class="dropdown hover">
+                    <a class="pure-menu-link">
+                        <i class="fas fa-cog"></i> Configuration
+                    </a>
+                    <div class="dropdown-content">
+                        <div class="themes">
+                            <div>Theme</div>
+                            <span *ngIf="configurationService.theme === 'light'" class="left selected">
+                                <i class="fas fa-circle"></i> Light
+                            </span>
+                            <span (click)="setTheme('light')" *ngIf="configurationService.theme !== 'light'" class="left unselected">
+                                <i class="far fa-circle"></i> Light
+                            </span>
+                            <span *ngIf="configurationService.theme === 'dark'" class="selected">
+                                <i class="fas fa-circle"></i> Dark
+                            </span>
+                            <span (click)="setTheme('dark')" *ngIf="configurationService.theme !== 'dark'" class="unselected">
+                                <i class="far fa-circle"></i> Dark
+                            </span>
+                        </div>
+                        <div class="row">
+                            <div>Number of messages per topic for initial load</div>
+                            <div>
+                                <input type="text" class="pure-input-1" [(ngModel)]="configurationService.config.numberOfMessagesPerTopic">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div>Number of messages on screen</div>
+                            <div>
+                                <input type="text" class="pure-input-1" [(ngModel)]="configurationService.config.numberOfMessagesOnScreen">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
         </ul>
     </div>
 
 </div>
 
-<app-modal *ngIf="!!publishDetails.topic" [visible]="true" (closeModal)="publishDetails.topic = null" [width]="'900px'">
+<app-modal *ngIf="!!publishDetails.topic" [visible]="true" (closeModal)="publishDetails.topic = null" [width]="'900px'" [class.dark-theme]="configurationService.theme == 'dark'">
     <div title>
         Publish message to topic {{ publishDetails.topic.name }} connection {{ publishDetails.connection.name }}
     </div>

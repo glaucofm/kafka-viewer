@@ -13,6 +13,7 @@ import {KafkaService} from './service/kafka.service';
 import {MessageBoxComponent} from './messagebox/message-box.component';
 import {MomentModule} from 'ngx-moment';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {ConfigurationService} from "./service/configuration.service";
 
 @NgModule({
     declarations: [
@@ -32,7 +33,8 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
         NgxJsonViewerModule
     ],
     providers: [
-        KafkaService
+        KafkaService,
+        ConfigurationService
     ],
     bootstrap: [AppComponent]
 })
