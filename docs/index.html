@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>kafka-viewer.md</title>
+    <style></style>
+</head>
+<body id="preview" style="font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;">
+<h1 class="code-line" data-line-start=0 data-line-end=1><a id="kafkaviewer_0"></a>kafka-viewer</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="3">A tool to view and publish JSON messages on Kafka.</p>
+<h2 class="code-line" data-line-start=4 data-line-end=5><a id="Download_and_execute_4"></a>Download and execute</h2>
+<ul>
+    <li class="has-line-data" data-line-start="6" data-line-end="7">Download zip with windows distribution/executable
+        from the releases tab
+    </li>
+    <li class="has-line-data" data-line-start="7" data-line-end="9">Unzip to %LOCALAPPDATA%\Programs folder and execute
+        kafka-viewer.exe
+    </li>
+</ul>
+<h2 class="code-line" data-line-start=9 data-line-end=10><a id="Screenshots_9"></a>Screenshots</h2>
+<p class="has-line-data" data-line-start="11" data-line-end="19"><img
+    src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot1.png" alt="Screenshot 7"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot8.png" alt="Screenshot 8"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot1.png" alt="Screenshot 1"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot2.png" alt="Screenshot 2"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot3.png" alt="Screenshot 3"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot4.png" alt="Screenshot 4"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot5.png" alt="Screenshot 5"><br>
+    <img src="https://github.com/glaucofm/kafka-viewer/raw/master/src/assets/images/screenshot6.png" alt="Screenshot 6">
+</p>
+<h2 class="code-line" data-line-start=20 data-line-end=21><a id="Initial_setup_20"></a>Initial setup</h2>
+<ol>
+    <li class="has-line-data" data-line-start="22" data-line-end="23">Install nodejs and npm latest version</li>
+    <li class="has-line-data" data-line-start="23" data-line-end="25">run npm install</li>
+</ol>
+<p class="has-line-data" data-line-start="25" data-line-end="26">PS: This project includes node-rdkafka, which is a
+    wrapper over the C++ librdkafka binary library. Making a successful build of it may require some level of
+    tinkering.</p>
+<h2 class="code-line" data-line-start=27 data-line-end=28><a id="Build_and_execute_locally_27"></a>Build and execute
+    locally</h2>
+<p class="has-line-data" data-line-start="29" data-line-end="30">npm run electron-build</p>
+<h2 class="code-line" data-line-start=31 data-line-end=32><a id="Generate_windows_executable_31"></a>Generate windows
+    executable</h2>
+<p class="has-line-data" data-line-start="33" data-line-end="34">npm run dist</p>
+<h2 class="code-line" data-line-start=35 data-line-end=36><a id="Notes_35"></a>Notes</h2>
+<ul>
+    <li class="has-line-data" data-line-start="37" data-line-end="38">This project includes node-rdkafka, which requires
+        binary compilation and nodejs bindings specific to the nodejs version used.
+    </li>
+    <li class="has-line-data" data-line-start="38" data-line-end="39">After the bindings are generated on the electron
+        packager command, the nodejs code will no longer run on regular non-electron nodejs.
+    </li>
+</ul>
+
+</body>
+</html>
