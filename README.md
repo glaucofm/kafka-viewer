@@ -4,8 +4,8 @@ A tool to view and publish JSON messages on Kafka.
 
 ## Download and execute
 
-- Download zip with windows distribution/executable from https://glaucotools.s3-sa-east-1.amazonaws.com/kafka-viewer.zip
-- Unzip on %APPDATA% folder and execute kafka-viewer.exe
+- Download zip with windows distribution/executable from the releases tab
+- Unzip to %LOCALAPPDATA%\Programs folder and execute kafka-viewer.exe
 
 ## Screenshots
 
