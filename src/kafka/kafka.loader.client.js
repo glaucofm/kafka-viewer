@@ -46,9 +46,18 @@ class KafkaLoaderClient {
         consumer.on('data', function(message) {
             message.payload = message.value.toString();
             message.timestamp = moment(message.timestamp);
+            if (message.headers) {
+                let headers = [];
+                for (let headerGroup of message.headers) {
+                    for (const property of Object.keys(headerGroup)) {
+                        headers.push([ property, headerGroup[property].toString()]);
+                    }
+                }
+                message.headers = headers;
+            }
             _this.messages.push(message);
             _this.subscriptions[message.topic][message.partition] = message.offset + 1;
-            console.log('message', message.topic, 'partition', message.partition, 'offset', message.offset, 'length', message.payload.length);
+            console.log('message', message.topic, 'partition', message.partition, 'offset', message.offset, 'length', message.payload.length, message.headers);
         });
 
         consumer.on('disconnected', function(arg) {

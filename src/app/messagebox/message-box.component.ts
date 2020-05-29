@@ -1,6 +1,6 @@
 import {Component, QueryList, ViewChildren} from '@angular/core';
 import {KafkaService} from '../service/kafka.service';
-import {ApplicationEvent, Column, KafkaConnection, kafkaMessage, RowMessage, Topic} from '../model/types';
+import {ApplicationEvent, Column, KafkaConnection, KafkaMessage, RowMessage, Topic} from '../model/types';
 import * as moment from 'moment-timezone';
 import {NgxJsonViewerComponent} from 'ngx-json-viewer';
 import {EventService} from "../service/event.service";
@@ -103,7 +103,7 @@ export class MessageBoxComponent {
         ];
     }
 
-    insertMessage(connection: KafkaConnection, message: kafkaMessage) {
+    insertMessage(connection: KafkaConnection, message: KafkaMessage) {
         let rowMessage: RowMessage = message;
         rowMessage.connection = connection.name;
         rowMessage.formattedSize = this.humanFileSize(message.size);

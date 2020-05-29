@@ -17,7 +17,7 @@ export interface ApplicationEvent {
     data?: any
 }
 
-export interface kafkaMessage {
+export interface KafkaMessage {
     payload: string,
     size: number,
     key: string,
@@ -25,6 +25,7 @@ export interface kafkaMessage {
     offset: number,
     partition: number,
     timestamp: string,
+    headers?: string[][]
 }
 
 export interface Column {
@@ -37,7 +38,7 @@ export interface Column {
     width?: number,
 }
 
-export interface RowMessage extends kafkaMessage {
+export interface RowMessage extends KafkaMessage {
     connection?: string,
     formattedSize?: string,
     formattedTimestamp?: number,
@@ -46,6 +47,7 @@ export interface RowMessage extends kafkaMessage {
     completePayload?: string,
     parsedJson?: any,
     type?: string,
+    headersOpen?: boolean;
     userValues?: {
         [key: string]: any;
     },

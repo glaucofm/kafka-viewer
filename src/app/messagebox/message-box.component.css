@@ -2,7 +2,7 @@ div.message-box {
     padding: 0px 20px 20px 20px;
 }
 
-div.message-box table {
+div.message-box table.messages {
     width: 100%;
 }
 
@@ -40,33 +40,35 @@ td.time span.ago:hover, td.time span.formatted {
     display: none
 }
 
-td.payload span.show-json, td.payload span.show-formatted {
+td.payload span.show-json, td.payload span.show-formatted, td.payload span.show-headers {
     display: none;
 }
 
-td.payload:hover span.show-json, td.payload:hover span.show-formatted {
+td.payload:hover span.show-json, td.payload:hover span.show-formatted, td.payload:hover span.show-headers {
     display: block;
 }
 
-span.show-json, span.show-formatted {
+span.show-json, span.show-formatted, span.show-headers {
     float: left;
     color: gray;
     margin-right: 10px;
     cursor: pointer;
 }
 
-span.close-json, span.close-formatted, span.copy-formatted {
+span.close-json, span.close-formatted, span.copy-formatted, span.close-headers {
     float: left;
     color: gray;
     margin-right: 10px;
     cursor: pointer;
 }
 
-span.show-json:hover, span.show-formatted:hover, span.close-json:hover, span.close-formatted:hover {
+span.show-json:hover, span.show-formatted:hover, span.show-headers:hover,
+span.close-json:hover, span.close-formatted:hover, span.close-headers:hover {
     color: blue;
 }
 
-.dark-theme span.show-json:hover, .dark-theme span.show-formatted:hover, .dark-theme span.close-json:hover, .dark-theme span.close-formatted:hover {
+.dark-theme span.show-json:hover, .dark-theme span.show-formatted:hover, .dark-theme span.show-headers:hover,
+.dark-theme span.close-json:hover, .dark-theme span.close-formatted:hover, .dark-theme span.close-headers:hover {
     color: deepskyblue;
 }
 
@@ -119,3 +121,14 @@ th.resizable:hover {
 span.no-messages {
     color: lightgray;
 }
+
+table.headers {
+    clear: both;
+    margin-left: 20px;
+}
+
+table.headers td, table.headers th {
+    text-align: left;
+    border: 0px solid transparent;
+}
+

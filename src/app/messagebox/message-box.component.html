@@ -1,6 +1,6 @@
 <div *ngIf="kafkaService.getNumTopicsSelected() > 0" [class.message-box]="true" [class.dark-theme]="configurationService.theme == 'dark'">
 
-    <table class="pure-table">
+    <table class="pure-table messages">
         <tr>
             <ng-container *ngFor="let column of columns">
                 <ng-container *ngIf="column.isEnabled">
@@ -56,14 +56,17 @@
                             </td>
 
                             <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200">
-                                <ng-container *ngIf="!message.json && !message.formattedJson">
+                                <ng-container *ngIf="!message.json && !message.formattedJson && !message.headersOpen">
                                     <span class="show-json" (click)="viewJSON(message)">
                                         JSON
                                     </span>
                                     <span class="show-formatted" (click)="viewFormatted(message)">
                                         Formatted
                                     </span>
-                                            {{ message.payload }}
+                                    <span class="show-headers"  *ngIf="message.headers && message.headers.length > 0" (click)="message.headersOpen = true">
+                                        Headers
+                                    </span>
+                                    {{ message.payload }}
                                 </ng-container>
                                 <ng-container *ngIf="!!message.json">
                                     <span class="close-json" (click)="message.json = null">
@@ -79,6 +82,21 @@
                                         Copy <span class="copy-message" *ngIf="showCopyMessage">(Text copied)</span>
                                     </span>
                                     <pre>{{ message.formattedJson }}</pre>
+                                </ng-container>
+                                <ng-container *ngIf="message.headersOpen">
+                                    <span class="close-headers" (click)="message.headersOpen = false">
+                                        Close
+                                    </span>
+                                    <table class="headers">
+                                        <tr>
+                                            <th>Header</th><th>Value</th>
+                                        </tr>
+                                        <ng-container *ngFor="let header of message.headers">
+                                            <tr>
+                                                <td>{{ header[0] }}</td><td>{{ header[1] }}</td>
+                                            </tr>
+                                        </ng-container>
+                                    </table>
                                 </ng-container>
                             </td>
 
