@@ -134,7 +134,14 @@ export class MessageBoxComponent {
         row.userValues = {};
         for (let column of this.columns) {
             if (column.isUserDefined) {
-                row.userValues[column.name] = this.extractColumnValue(row, column);
+                if (column.jsonPath.startsWith('metadata.')) {
+                    row.userValues[column.name] = row[column.jsonPath.replace(/^metadata./, '')];
+                } else if (column.jsonPath.startsWith('headers.') && row.headers && row.headers.length) {
+                    let header = row.headers.find(x => x[0] == column.jsonPath.replace(/^headers./, ''));
+                    row.userValues[column.name] = header? header[1] : '';
+                } else {
+                    row.userValues[column.name] = this.extractColumnValue(row, column);
+                }
             }
         }
     }

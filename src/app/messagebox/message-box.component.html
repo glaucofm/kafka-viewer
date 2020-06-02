@@ -56,15 +56,15 @@
                             </td>
 
                             <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200">
-                                <ng-container *ngIf="!message.json && !message.formattedJson && !message.headersOpen">
+                                <ng-container *ngIf="!message.json && !message.formattedJson && !message.metadataOpen">
                                     <span class="show-json" (click)="viewJSON(message)">
                                         JSON
                                     </span>
                                     <span class="show-formatted" (click)="viewFormatted(message)">
                                         Formatted
                                     </span>
-                                    <span class="show-headers"  *ngIf="message.headers && message.headers.length > 0" (click)="message.headersOpen = true">
-                                        Headers
+                                    <span class="show-metadata" (click)="message.metadataOpen = true">
+                                        Metadata
                                     </span>
                                     {{ message.payload }}
                                 </ng-container>
@@ -83,18 +83,27 @@
                                     </span>
                                     <pre>{{ message.formattedJson }}</pre>
                                 </ng-container>
-                                <ng-container *ngIf="message.headersOpen">
-                                    <span class="close-headers" (click)="message.headersOpen = false">
+                                <ng-container *ngIf="message.metadataOpen">
+                                    <span class="close-metadata" (click)="message.metadataOpen = false">
                                         Close
                                     </span>
-                                    <table class="headers">
+                                    <table class="metadata">
                                         <tr>
-                                            <th>Header</th><th>Value</th>
+                                            <th>Metadata</th><th>Value</th>
                                         </tr>
-                                        <ng-container *ngFor="let header of message.headers">
+                                        <tr><td>Key</td><td>{{ message.key }}</td></tr>
+                                        <tr><td>Offset</td><td>{{ message.offset }}</td></tr>
+                                        <tr><td>Partition</td><td>{{ message.partition }}</td></tr>
+                                        <tr><td>Size</td><td>{{ message.size }} bytes</td></tr>
+                                        <ng-container *ngIf="message.headers && message.headers.length">
                                             <tr>
-                                                <td>{{ header[0] }}</td><td>{{ header[1] }}</td>
+                                                <th>Header</th><th>Value</th>
                                             </tr>
+                                            <ng-container *ngFor="let header of message.headers">
+                                                <tr>
+                                                    <td>{{ header[0] }}</td><td>{{ header[1] }}</td>
+                                                </tr>
+                                            </ng-container>
                                         </ng-container>
                                     </table>
                                 </ng-container>

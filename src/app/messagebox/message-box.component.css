@@ -40,35 +40,35 @@ td.time span.ago:hover, td.time span.formatted {
     display: none
 }
 
-td.payload span.show-json, td.payload span.show-formatted, td.payload span.show-headers {
+td.payload span.show-json, td.payload span.show-formatted, td.payload span.show-metadata {
     display: none;
 }
 
-td.payload:hover span.show-json, td.payload:hover span.show-formatted, td.payload:hover span.show-headers {
+td.payload:hover span.show-json, td.payload:hover span.show-formatted, td.payload:hover span.show-metadata {
     display: block;
 }
 
-span.show-json, span.show-formatted, span.show-headers {
+span.show-json, span.show-formatted, span.show-metadata {
     float: left;
     color: gray;
     margin-right: 10px;
     cursor: pointer;
 }
 
-span.close-json, span.close-formatted, span.copy-formatted, span.close-headers {
+span.close-json, span.close-formatted, span.copy-formatted, span.close-metadata {
     float: left;
     color: gray;
     margin-right: 10px;
     cursor: pointer;
 }
 
-span.show-json:hover, span.show-formatted:hover, span.show-headers:hover,
-span.close-json:hover, span.close-formatted:hover, span.close-headers:hover {
+span.show-json:hover, span.show-formatted:hover, span.show-metadata:hover,
+span.close-json:hover, span.close-formatted:hover, span.close-metadata:hover {
     color: blue;
 }
 
-.dark-theme span.show-json:hover, .dark-theme span.show-formatted:hover, .dark-theme span.show-headers:hover,
-.dark-theme span.close-json:hover, .dark-theme span.close-formatted:hover, .dark-theme span.close-headers:hover {
+.dark-theme span.show-json:hover, .dark-theme span.show-formatted:hover, .dark-theme span.show-metadata:hover,
+.dark-theme span.close-json:hover, .dark-theme span.close-formatted:hover, .dark-theme span.close-metadata:hover {
     color: deepskyblue;
 }
 
@@ -122,13 +122,12 @@ span.no-messages {
     color: lightgray;
 }
 
-table.headers {
+table.metadata {
     clear: both;
     margin-left: 20px;
 }
 
-table.headers td, table.headers th {
+table.metadata td, table.metadata th {
     text-align: left;
-    border: 0px solid transparent;
+    border: 1px solid #666;
 }
-

@@ -47,7 +47,7 @@ export interface RowMessage extends KafkaMessage {
     completePayload?: string,
     parsedJson?: any,
     type?: string,
-    headersOpen?: boolean;
+    metadataOpen?: boolean;
     userValues?: {
         [key: string]: any;
     },
