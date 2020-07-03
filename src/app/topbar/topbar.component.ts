@@ -145,16 +145,24 @@ export class TopbarComponent {
         let index = this.columns.findIndex(x => x.name === column.name);
         this.columns[index] = this.columns[index - 1];
         this.columns[index - 1] = column;
+        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
     }
 
     moveColumnDown(column: Column) {
         let index = this.columns.findIndex(x => x.name === column.name);
         this.columns[index] = this.columns[index + 1];
         this.columns[index + 1] = column;
+        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
     }
 
     removeColumn(column: Column) {
         this.columns = this.columns.filter(x => x.name !== column.name);
+        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+    }
+
+    toggleColumn(column: Column) {
+        column.isEnabled = !column.isEnabled;
+        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
     }
 
     setTheme(theme) {

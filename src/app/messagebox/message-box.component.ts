@@ -49,7 +49,6 @@ export class MessageBoxComponent {
             } else if (event.type === 'disconnect') {
                 this.messages = this.messages.filter(x => x.connection != event.data.name);
             } else if (event.type === 'columns-modified') {
-                console.log('columns modified', event.data);
                 this.columns = event.data;
                 this.setUserValuesOnAllRows();
             } else if (event.type === 'subscribed-to-topic' || 'messages-to-fetch') {
@@ -133,7 +132,7 @@ export class MessageBoxComponent {
     setUserValues(row: RowMessage) {
         row.userValues = {};
         for (let column of this.columns) {
-            if (column.isUserDefined) {
+            if (column.isUserDefined && column.jsonPath) {
                 if (column.jsonPath.startsWith('metadata.')) {
                     row.userValues[column.name] = row[column.jsonPath.replace(/^metadata./, '')];
                 } else if (column.jsonPath.startsWith('headers.') && row.headers && row.headers.length) {

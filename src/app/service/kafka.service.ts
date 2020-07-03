@@ -118,7 +118,6 @@ export class KafkaService {
     }
 
     public async getMessages(connection: KafkaConnection) {
-        // {"value":"59 chars","size":59,"key":null,"topic":"TOP.KAVIEW.02","offset":10490,"partition":0,"timestamp":"2019-10-04T04:15:31.894Z"}
         let messages = await this.getJson('messages', '?name=' + connection.name);
         if (messages.length) {
             console.log('Received ', messages.length, 'messages');
