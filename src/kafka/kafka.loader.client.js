@@ -46,6 +46,9 @@ class KafkaLoaderClient {
         consumer.on('data', function(message) {
             message.payload = message.value.toString();
             message.timestamp = moment(message.timestamp);
+            if (message.key) {
+                message.key = message.key.toString();
+            }
             if (message.headers) {
                 let headers = [];
                 for (let headerGroup of message.headers) {
