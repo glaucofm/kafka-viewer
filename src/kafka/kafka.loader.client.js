@@ -10,6 +10,7 @@ class KafkaLoaderClient {
         this.topicsToAssign = [];
         this.messages = [];
         this.consumer = this.newConsumer(brokers);
+        this.producer = this.newProducer(brokers);
         this.subscriptions = null;
     }
 
@@ -70,6 +71,35 @@ class KafkaLoaderClient {
         consumer.connect();
 
         return consumer;
+    }
+
+    newProducer(brokers) {
+        let _this = this;
+
+        let producer = new Kafka.Producer({
+            'group.id': 'kafka-test-01',
+            'metadata.broker.list': brokers,
+            'enable.auto.commit': false
+        });
+
+        consumer.on('event.log', function (log) {
+            console.log(log);
+        });
+
+        consumer.on('event.error', function (err) {
+            console.error('Error from producer', err);
+        });
+
+        consumer.on('ready', function (data) {
+            console.log('producer ready', data);
+        });
+
+        producer.connect();
+        return producer;
+    }
+
+    publish(topic, message, headers) {
+        this.producer.produce(topic, -1, message, null, Date.now(), "", headers);
     }
 
     disconnect() {

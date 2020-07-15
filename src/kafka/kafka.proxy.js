@@ -35,7 +35,7 @@ class KafkaProxy {
         await admin.connect();
         try {
             let response = await admin.fetchTopicMetadata();
-            return response.topics.filter(x => !x.name.startsWith("_")).map(x => x.name);
+            return response.topics.filter(x => !x.name.startsWith("_")).map(x => x.name).sort();
         } finally {
             await admin.disconnect();
         }
@@ -56,16 +56,14 @@ class KafkaProxy {
         }
     }
 
-    consume(topic, partition, message) {
-        console.log({
-            key: message.key.toString(),
-            value: message.value.toString(),
-            headers: message.headers,
-        });
+    consume(payload) {
+        console.log(payload);
     }
 
     async subscribe(topic, offsets) {
-        await this.consumer.subscribe(topic);
+        await this.consumer.stop();
+        await this.consumer.subscribe({ topic });
+        await this.consumer.run({ eachMessage: this.consume });
         for (let offset of offsets) {
             this.consumer.seek({ topic, partition: offset.partition, offset: offset.position });
         }
@@ -76,8 +74,20 @@ class KafkaProxy {
 async function main() {
     let proxy = new KafkaProxy([ '192.168.58.159:9092' ]);
     await proxy.connect();
-    console.log(await proxy.getTopics());
-    console.log(await proxy.getOffsets('my.topic.1'));
+    // console.log(JSON.stringify(await proxy.getTopics()));
+    // console.log(await proxy.getOffsets(''));
+    await proxy.subscribe('', [
+        { partition: 1, position: '1486', end: '1492' },
+        { partition: 4, position: '1495', end: '1502' },
+        { partition: 7, position: '1481', end: '1487' },
+        { partition: 2, position: '1494', end: '1500' },
+        { partition: 5, position: '1491', end: '1498' },
+        { partition: 8, position: '1496', end: '1502' },
+        { partition: 0, position: '1507', end: '1513' },
+        { partition: 3, position: '1488', end: '1494' },
+        { partition: 6, position: '1486', end: '1492' },
+        { partition: 9, position: '1495', end: '1502' }
+        ]);
 }
 
 main();
