@@ -1,6 +1,6 @@
-import {Component, ViewEncapsulation} from '@angular/core';
+import {Component} from '@angular/core';
 import {KafkaService} from '../service/kafka.service';
-import {Column, KafkaConnection, Topic} from '../model/types';
+import {Column, EventType, KafkaConnection, Topic} from '../model/types';
 import {StorageService} from '../service/storage.service';
 import {MessageBoxComponent} from "../messagebox/message-box.component";
 import {EventService} from "../service/event.service";
@@ -30,9 +30,13 @@ export class TopbarComponent {
     public publishDetails: {
         connection?: KafkaConnection,
         topic?: Topic,
-        message: string
+        key: string;
+        headers: string;
+        value: string;
     } = {
-        message: null
+        key: null,
+        headers: null,
+        value: ''
     };
 
     constructor(kafkaService: KafkaService, configurationService: ConfigurationService) {
@@ -65,7 +69,7 @@ export class TopbarComponent {
         let columns = this.columns.filter(x => x.isUserDefined).map(x => x.name + x.jsonPath + x.isEnabled).join('');
         if (columns != this.oldColumns) {
             this.oldColumns = columns;
-            EventService.emitter.emit({ type: 'columns-modified', data: this.columns });
+            EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
             StorageService.save('columns', this.columns);
         }
     }
@@ -100,7 +104,20 @@ export class TopbarComponent {
     }
 
     publish() {
-        this.kafkaService.publish(this.publishDetails.connection, this.publishDetails.topic, this.publishDetails.message);
+        let headers;
+        if (this.publishDetails.headers) {
+            try {
+                headers = JSON.parse(this.publishDetails.headers)
+            } catch (e) {
+                alert(e);
+                return;
+            }
+        }
+        this.kafkaService.publish(this.publishDetails.topic, {
+            key: this.publishDetails.key,
+            headers: headers,
+            value: this.publishDetails.value
+        });
         this.publishDetails.topic = null;
     }
 
@@ -138,31 +155,31 @@ export class TopbarComponent {
 
     addColumn() {
         this.columns.push({name: '', isEnabled: false, isUserDefined: true, isResizable: true });
-        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+        EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
     }
 
     moveColumnUp(column: Column) {
         let index = this.columns.findIndex(x => x.name === column.name);
         this.columns[index] = this.columns[index - 1];
         this.columns[index - 1] = column;
-        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+        EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
     }
 
     moveColumnDown(column: Column) {
         let index = this.columns.findIndex(x => x.name === column.name);
         this.columns[index] = this.columns[index + 1];
         this.columns[index + 1] = column;
-        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+        EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
     }
 
     removeColumn(column: Column) {
         this.columns = this.columns.filter(x => x.name !== column.name);
-        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+        EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
     }
 
     toggleColumn(column: Column) {
         column.isEnabled = !column.isEnabled;
-        EventService.emitter.emit({ type: "columns-modified", data: this.columns });
+        EventService.emitter.emit({ type: EventType.COLUMNS_MODIFIED, data: this.columns });
     }
 
     setTheme(theme) {

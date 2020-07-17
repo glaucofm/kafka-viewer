@@ -233,9 +233,18 @@
         Publish message to topic {{ publishDetails.topic.name }} connection {{ publishDetails.connection.name }}
     </div>
     <div body>
-        <textarea class="pure-input-1 publish" rows="30" [(ngModel)]="publishDetails.message"></textarea>
+        <form class="pure-form pure-form-stacked">
+            <fieldset>
+                <label for="key">Key</label>
+                <input id="key" name="key" type="text" class="pure-input-1" [(ngModel)]="publishDetails.key" placeholder="*Not mandatory">
+                <label for="headers">Headers (as json dict)</label>
+                <textarea id="headers" name="headers" class="pure-input-1" rows="3" [(ngModel)]="publishDetails.headers" placeholder='{ "key": "value" }'></textarea>
+                <label for="publish">Message body</label>
+                <textarea id="publish" name="publish" class="pure-input-1 publish" rows="30" [(ngModel)]="publishDetails.value"></textarea>
+            </fieldset>
+        </form>
     </div>
     <div footer>
-        <button type="submit" class="pure-button pure-button-primary" (click)="publish()">Publish</button>
+        <button type="button" class="pure-button pure-button-primary" (click)="publish()">Publish</button>
     </div>
 </app-modal>
