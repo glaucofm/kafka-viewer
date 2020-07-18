@@ -1,17 +1,17 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {StorageService} from './storage.service';
-import {ApplicationEvent, KafkaConnection, Topic} from '../model/types';
+import {ApplicationEvent, EventType, KafkaConnection, Offset, Topic, TopicsEvent} from '../model/types';
 import {EventService} from "./event.service";
 import {ConfigurationService} from "./configuration.service";
+import {IpcService} from "./ipc.service";
 
 @Injectable()
 export class KafkaService {
 
     public connections: KafkaConnection[] = [];
     public activeConnections: KafkaConnection[] = [];
-    public configurationService: ConfigurationService;
 
-    constructor(configurationService: ConfigurationService) {
+    constructor(public configurationService: ConfigurationService, public ipcService: IpcService) {
         this.configurationService = configurationService;
         this.connections = StorageService.get('connections');
         if (!this.connections) {
@@ -21,11 +21,22 @@ export class KafkaService {
         for (const connection of this.connections) {
             connection.isConnected = false;
         }
-        setInterval(async () => {
-            for (const connection of this.activeConnections) {
-                await this.getMessages(connection);
+        this.subscribeToEvents();
+    }
+
+    private subscribeToEvents() {
+        let _this = this;
+        EventService.emitter.subscribe((event: ApplicationEvent) => {
+            if (event.type == EventType.CONNECTED) {
+                _this.setConnected(event.data);
+            } else if (event.type == EventType.TOPICS) {
+                _this.receiveTopics(event.data.name, event.data.topics);
+            } else if (event.type == EventType.OFFSETS) {
+                _this.receiveOffsets(event.data.name, event.data.topic, event.data.offsets);
+            } else if (event.type == EventType.MESSAGES) {
+                _this.receiveMessages(event.data.name, event.data.messages);
             }
-        }, 500);
+        });
     }
 
     public saveConnection(connection: KafkaConnection, editedConnection?: KafkaConnection) {
@@ -39,16 +50,27 @@ export class KafkaService {
     }
 
     public connect(connection: KafkaConnection) {
-        this.connectOnBackend(connection);
+        this.ipcService.send(EventType.CONNECT, connection);
         connection.isConnected = true;
         this.activeConnections = this.connections.filter(x => x.isConnected);
     }
 
+    private setConnected(name: string) {
+    }
+
+    private receiveTopics(name: string, topics: string[]) {
+        let connection = this.getConnection(name);
+        connection.topics = topics.map(x => { return { name: x, isSelected: false, connectionName: connection.name }});
+        setTimeout(() => {
+            this.restoreSelectedTopics(connection);
+        }, 200);
+    }
+
     public disconnect(connection: KafkaConnection) {
-        this.getJson('disconnect', '?name=' + connection.name);
+        this.ipcService.send(EventType.DISCONNECT, connection.name);
         connection.isConnected = false;
         this.activeConnections = this.connections.filter(x => x.isConnected);
-        EventService.emitter.emit({ type: 'disconnect', data: connection });
+        EventService.emitter.emit({ type: EventType.DISCONNECT, data: connection });
     }
 
     public getActiveConnectionsNames(): string {
@@ -59,15 +81,6 @@ export class KafkaService {
         return this.activeConnections.length > 0;
     }
 
-    private async connectOnBackend(connection: KafkaConnection) {
-        let topics = await this.getJson('connect', '?name=' + connection.name + '&brokers=' + connection.brokers);
-        topics = Object.keys(topics); topics.sort();
-        connection.topics = topics.map(key => { return { name: key, isSelected: false, connectionName: connection.name }});
-        setTimeout(() => {
-            this.restoreSelectedTopics(connection);
-        }, 1000);
-    }
-
     private restoreSelectedTopics(connection: KafkaConnection) {
         let storedTopics: Topic[] = StorageService.get('subscribed-topics-' + connection.name);
         if (!storedTopics) {
@@ -75,7 +88,7 @@ export class KafkaService {
         }
         for (const topic of connection.topics) {
             let topics: Topic[] = storedTopics.filter(x => x.name == topic.name);
-            if (topics && topics[0].isSelected) {
+            if (topics.length > 0 && topics[0].isSelected) {
                 topic.isSelected = true;
                 this.subscribe(connection, topics[0]);
             }
@@ -95,44 +108,51 @@ export class KafkaService {
     }
 
     public async subscribe(connection: KafkaConnection, topic: Topic) {
-        EventService.emitter.emit({ type: 'subscribed-to-topic', data: { topic: topic } });
+        EventService.emitter.emit({type: EventType.SUBSCRIBED_TO_TOPIC, data: { topic }});
+        this.ipcService.send(EventType.GET_OFFSETS, { name: connection.name, topic: topic.name });
+    }
 
-        let offsets = await this.getJson('offsets', '?name=' + connection.name + '&topic=' + topic.name);
+    public receiveOffsets(name: string, topic: string, offsets: Offset[]) {
         let maxByPartition = Math.round(this.configurationService.config.numberOfMessagesPerTopic / offsets.length);
-
         let totalMessagesToFetch = offsets
             .map(offset => { return offset.end - Math.max(offset.start, offset.end - maxByPartition); })
             .reduce((x, y) => x + y, 0);
-        EventService.emitter.emit({ type: 'messages-to-fetch', data: { topic: topic, quantity: totalMessagesToFetch } });
 
-        let offsetsParam = offsets.map(offset => { return offset.partition + "=" + (Math.max(offset.start, offset.end - maxByPartition)) }).join(",");
+        EventService.emitter.emit({ type: EventType.MESSAGES_TO_FETCH, data: { topic: { connectionName: name, name: topic }, quantity: totalMessagesToFetch } });
 
-        this.getJson('subscribe', '?name=' + connection.name + '&topic=' + topic.name + '&offsets=' + offsetsParam);
-        StorageService.save('subscribed-topics-' + connection.name, connection.topics);
+        let positionOffsets = offsets.map(offset => { return {
+            partition: offset.partition,
+            position: (Math.max(offset.start, offset.end - maxByPartition))
+        }});
+
+        this.ipcService.send(EventType.SUBSCRIBE, { name: name, topic, offsets: positionOffsets });
+        StorageService.save('subscribed-topics-' + name, this.getConnection(name).topics);
     }
 
     public unsubscribe(connection: KafkaConnection, topic: Topic) {
-        this.getJson('unsubscribe', '?name=' + connection.name + '&topic=' + topic.name);
-        EventService.emitter.emit({ type: 'remove-topic', data: topic.name });
+        this.ipcService.send(EventType.UNSUBSCRIBE, { name: topic.connectionName, topic: topic.name });
+        EventService.emitter.emit({ type: EventType.REMOVE_TOPIC, data: topic.name });
         StorageService.save('subscribed-topics-' + connection.name, connection.topics);
     }
 
-    public async getMessages(connection: KafkaConnection) {
-        let messages = await this.getJson('messages', '?name=' + connection.name);
-        if (messages.length) {
-            console.log('Received ', messages.length, 'messages');
-            EventService.emitter.emit({
-                type: 'message',
-                data: {
-                    connection: connection,
-                    messages: messages
-                }
-            })
-        }
+    public receiveMessages(name: string, messages) {
+        console.log('Received ', messages.length, 'messages');
+        let connection = this.getConnection(name);
+        EventService.emitter.emit({
+            type: EventType.MESSAGE,
+            data: {
+                connection: connection,
+                messages: messages
+            }
+        })
     }
 
-    public async publish(connection: KafkaConnection, topic: Topic, message: string) {
-        this.doPost('publish', '?name=' + connection.name + '&topic=' + topic.name, message);
+    public async publish(topic: Topic, message: any) {
+        this.ipcService.send(EventType.PUBLISH, { name: topic.connectionName, topic: topic.name, message });
+    }
+
+    private getConnection(name: string): KafkaConnection {
+        return this.connections.find(x => x.name == name);
     }
 
     private async doPost(url: string, params: string, data: string) {

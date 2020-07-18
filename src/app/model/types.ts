@@ -12,9 +12,29 @@ export interface Topic {
     connectionName?: string
 }
 
+export enum EventType {
+    MESSAGE = 'message',
+    MESSAGES = 'messages',
+    REMOVE_TOPIC = 'remove-topic',
+    DISCONNECT = 'disconnect',
+    COLUMNS = 'columns',
+    COLUMNS_MODIFIED = 'columns-modified',
+    SUBSCRIBED_TO_TOPIC = 'subscribed-to-topic',
+    MESSAGES_TO_FETCH = 'messages-to-fetch',
+    THEME = 'theme',
+    TOPICS = 'topics',
+    GET_OFFSETS = 'get-offsets',
+    OFFSETS = 'offsets',
+    SUBSCRIBE = 'subscribe',
+    UNSUBSCRIBE = 'unsubscribe',
+    PUBLISH = 'publish',
+    CONNECT = 'connect',
+    CONNECTED = 'connected'
+}
+
 export interface ApplicationEvent {
-    type: 'message' | 'end-messages' | 'remove-topic' | 'disconnect' | 'columns' | 'columns-modified' | 'subscribed-to-topic' | 'messages-to-fetch' | 'theme',
-    data?: any
+    type: EventType;
+    data?: any;
 }
 
 export interface KafkaMessage {
@@ -51,4 +71,21 @@ export interface RowMessage extends KafkaMessage {
     userValues?: {
         [key: string]: any;
     },
+}
+
+export interface TopicsEvent {
+    name: string,
+    topics: string[]
+}
+
+export interface OffsetsEvent {
+    name: string;
+    topic: string;
+    offsets: Offset[];
+}
+
+export interface Offset {
+    partition: number,
+    start: number,
+    end: number
 }

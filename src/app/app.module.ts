@@ -14,6 +14,7 @@ import {MessageBoxComponent} from './messagebox/message-box.component';
 import {MomentModule} from 'ngx-moment';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {ConfigurationService} from "./service/configuration.service";
+import {IpcService} from "./service/ipc.service";
 
 @NgModule({
     declarations: [
@@ -34,7 +35,8 @@ import {ConfigurationService} from "./service/configuration.service";
     ],
     providers: [
         KafkaService,
-        ConfigurationService
+        ConfigurationService,
+        IpcService
     ],
     bootstrap: [AppComponent]
 })

@@ -1,6 +1,6 @@
 import {Component, QueryList, ViewChildren} from '@angular/core';
 import {KafkaService} from '../service/kafka.service';
-import {ApplicationEvent, Column, KafkaConnection, KafkaMessage, RowMessage, Topic} from '../model/types';
+import {ApplicationEvent, Column, EventType, KafkaConnection, KafkaMessage, RowMessage, Topic} from '../model/types';
 import * as moment from 'moment-timezone';
 import {NgxJsonViewerComponent} from 'ngx-json-viewer';
 import {EventService} from "../service/event.service";
@@ -35,7 +35,7 @@ export class MessageBoxComponent {
         }
 
         EventService.emitter.subscribe((event: ApplicationEvent) => {
-            if (event.type === 'message') {
+            if (event.type === EventType.MESSAGE) {
                 this.removeNotifications(event.data.connection.name, [... new Set(event.data.messages.map(x => x.topic))]);
                 for (const message of event.data.messages) {
                     this.insertMessage(event.data.connection, message);
@@ -44,17 +44,18 @@ export class MessageBoxComponent {
                 if (this.messages.length > this.configurationService.config.numberOfMessagesOnScreen) {
                     this.messages = this.messages.slice(0, this.configurationService.config.numberOfMessagesOnScreen);
                 }
-            } else if (event.type === 'remove-topic') {
+            } else if (event.type === EventType.REMOVE_TOPIC) {
                 this.messages = this.messages.filter(x => x.topic !== event.data);
-            } else if (event.type === 'disconnect') {
+            } else if (event.type === EventType.DISCONNECT) {
                 this.messages = this.messages.filter(x => x.connection != event.data.name);
-            } else if (event.type === 'columns-modified') {
+            } else if (event.type === EventType.COLUMNS_MODIFIED) {
                 this.columns = event.data;
                 this.setUserValuesOnAllRows();
-            } else if (event.type === 'subscribed-to-topic' || 'messages-to-fetch') {
+            } else if (event.type === EventType.SUBSCRIBED_TO_TOPIC || event.type === EventType.MESSAGES_TO_FETCH) {
+                console.log('-----', event.type, event.data);
                 this.removeNotifications(event.data.topic.connectionName, [ event.data.topic.name ]);
-                this.messages.unshift(this.getNotificationMessage(event));
-                if (event.type == 'messages-to-fetch' && event.data.quantity == 0) {
+                this.messages.unshift(this.getNotificationMessage(event.type, event.data));
+                if (event.type == EventType.MESSAGES_TO_FETCH && event.data.quantity == 0) {
                     setTimeout(() => {
                         this.removeNotifications(event.data.topic.connectionName, [ event.data.topic.name ]);
                     }, 10000);
@@ -79,12 +80,19 @@ export class MessageBoxComponent {
         }
     }
 
-    getNotificationMessage(event: ApplicationEvent): RowMessage {
+    getNotificationMessage(type, data): RowMessage {
+        console.log('getNotificationMessage', type, data);
         return {
-            connection: event.data.topic.connectionName, topic: event.data.topic.name,
+            connection: data.topic.connectionName,
+            topic: data.topic.name,
             timestamp: moment(new Date(), 'UTC').format("YYYY-MM-DD HH:mm.ss"),
-            type: event.type, userValues: { numOfMessages: event.data.quantity },
-            payload: '', size: 0, key: '', offset: 0, partition: 0,
+            type: type,
+            userValues: { numOfMessages: data.quantity },
+            payload: '',
+            size: 0,
+            key: '',
+            offset: 0,
+            partition: 0,
         }
     }
 

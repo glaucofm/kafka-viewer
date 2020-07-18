@@ -4,12 +4,10 @@ class KafkaProxy {
 
     constructor(brokers) {
         this.brokers = brokers;
+        this.messages = [];
     }
 
-
     async connect() {
-        this.isReady = false;
-        this.topicsToAssign = [];
         this.messages = [];
         this.subscriptions = null;
         this.kafka = new Kafka({
@@ -17,17 +15,17 @@ class KafkaProxy {
             brokers: this.brokers,
             connectionTimeout: 10000
         });
-        this.consumer = this.kafka.consumer({ groupId: 'kafka-viewer-1' });
-        await this.consumer.connect();
-        await this.consumer.run({ eachMessage: this.consume });
         this.producer = this.kafka.producer();
         await this.producer.connect();
+        this.consumers = [];
         console.log("connected");
     }
 
     async disconnect() {
-        await this.consumer.disconnect();
         await this.producer.disconnect();
+        for (let consumer of this.consumers) {
+            await consumer.consumer.disconnect();
+        }
     }
 
     async getTopics() {
@@ -41,11 +39,11 @@ class KafkaProxy {
         }
     }
 
-    async getOffsets(topicName) {
+    async getOffsets(topic) {
         const admin = this.kafka.admin();
         await admin.connect();
         try {
-            let offsets = await admin.fetchTopicOffsets(topicName);
+            let offsets = await admin.fetchTopicOffsets(topic);
             return offsets.map( x => { return {
                 partition: x.partition,
                 start: x.low,
@@ -56,39 +54,75 @@ class KafkaProxy {
         }
     }
 
-    consume(payload) {
-        console.log(payload);
+    async subscribe(topic, offsets) {
+        let consumer = this.kafka.consumer({ groupId: 'kafka-viewer-' + topic });
+        await consumer.connect();
+        await consumer.subscribe({ topic });
+        consumer.run({ eachMessage: (x) => { this.consume(x) } });
+        for (let offset of offsets) {
+            consumer.seek({ topic, partition: offset.partition, offset: offset.position });
+        }
+        this.consumers.push({ topic, consumer });
     }
 
-    async subscribe(topic, offsets) {
-        await this.consumer.stop();
-        await this.consumer.subscribe({ topic });
-        await this.consumer.run({ eachMessage: this.consume });
-        for (let offset of offsets) {
-            this.consumer.seek({ topic, partition: offset.partition, offset: offset.position });
-        }
+    async unsubscribe(topic) {
+        let consumer = this.consumers.find(x => x.topic === topic);
+        await consumer.consumer.disconnect();
+        this.consumers = this.consumers.filter(x => x.topic !== topic);
+    }
+
+    async produce(topic, message) {
+        await this.producer.send({ topic, messages: [ message ] });
+    }
+
+    consume(payload) {
+        let content = payload.message.value.toString();
+        console.log('Received message: partition', payload.partition, 'offset', payload.message.offset, 'content', content.length, 'chars');
+        payload.message.topic = payload.topic;
+        this.messages.push({
+            topic: payload.topic,
+            key: payload.message.key,
+            size: content.length,
+            offset: Number(payload.message.offset),
+            partition: payload.partition,
+            timestamp: Number(payload.message.timestamp),
+            payload: content,
+            headers: Object.keys(payload.message.headers).map(x => [x, payload.message.headers[x]? payload.message.headers[x].toString() : null])
+        });
+    }
+
+    offloadMessages() {
+        return this.messages.splice(0, this.messages.length);
     }
 
 }
+
+module.exports = KafkaProxy;
 
 async function main() {
     let proxy = new KafkaProxy([ '192.168.58.159:9092' ]);
     await proxy.connect();
-    // console.log(JSON.stringify(await proxy.getTopics()));
-    // console.log(await proxy.getOffsets(''));
-    await proxy.subscribe('', [
-        { partition: 1, position: '1486', end: '1492' },
-        { partition: 4, position: '1495', end: '1502' },
-        { partition: 7, position: '1481', end: '1487' },
-        { partition: 2, position: '1494', end: '1500' },
-        { partition: 5, position: '1491', end: '1498' },
-        { partition: 8, position: '1496', end: '1502' },
-        { partition: 0, position: '1507', end: '1513' },
-        { partition: 3, position: '1488', end: '1494' },
-        { partition: 6, position: '1486', end: '1492' },
-        { partition: 9, position: '1495', end: '1502' }
-        ]);
+    // console.log(await proxy.getTopics());
+    // console.log(await proxy.getOffsets('EXAMPLE.TOPIC.SOME.NAME.01'));
+    await sleep(5000);
+    for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.02']) {
+        let messages = [];
+        for (let i = 0; i < 10; i++) {
+            messages.push({
+                value: '{ "myIndex": ' + i + ' }'
+            });
+        }
+        console.log('sending messages...');
+        await proxy.producer.send({topic: topic, messages })
+    }
+    console.log('done');
 }
 
-main();
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+// main();
 
