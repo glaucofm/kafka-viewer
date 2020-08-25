@@ -113,20 +113,56 @@ export class KafkaService {
     }
 
     public receiveOffsets(name: string, topic: string, offsets: Offset[]) {
-        let maxByPartition = Math.round(this.configurationService.config.numberOfMessagesPerTopic / offsets.length);
-        let totalMessagesToFetch = offsets
-            .map(offset => { return offset.end - Math.max(offset.start, offset.end - maxByPartition); })
-            .reduce((x, y) => x + y, 0);
-
-        EventService.emitter.emit({ type: EventType.MESSAGES_TO_FETCH, data: { topic: { connectionName: name, name: topic }, quantity: totalMessagesToFetch } });
-
-        let positionOffsets = offsets.map(offset => { return {
-            partition: offset.partition,
-            position: (Math.max(offset.start, offset.end - maxByPartition))
-        }});
-
+        let positionOffsets = this.calculatePositions(offsets, this.configurationService.config.numberOfMessagesPerTopic);
+        let numberOfMessagesToFetch = positionOffsets.map(x => x.numberOfMessages).reduce((x, y) => x + y)
+        EventService.emitter.emit({ type: EventType.MESSAGES_TO_FETCH, data: { topic: { connectionName: name, name: topic }, quantity: numberOfMessagesToFetch } });
         this.ipcService.send(EventType.SUBSCRIBE, { name: name, topic, offsets: positionOffsets });
         StorageService.save('subscribed-topics-' + name, this.getConnection(name).topics);
+    }
+
+    private calculatePositions(offsets: Offset[], maxMessages: number) {
+        let totalMessages = offsets.map(x => x.end - x.start).reduce((x, y) => x + y);
+        if (totalMessages <= maxMessages) {
+            return offsets.map(x => { return {
+                partition: x.partition,
+                position: x.start,
+                numberOfMessages: x.end - x.start
+            }});
+        }
+        let numPartitionsWithMessages = offsets.filter(x => x.end > x.start).length;
+        let positionOffsets = [];
+
+        for (let offset of offsets) {
+            let numberOfMessages = Math.round((offset.end - offset.start) * (maxMessages / totalMessages));
+            positionOffsets.push({
+                partition: offset.partition,
+                start: offset.start,
+                end: offset.end,
+                position: offset.end - numberOfMessages,
+                numberOfMessages
+            })
+        }
+
+        let difference = maxMessages - positionOffsets.map(x => x.numberOfMessages).reduce((x, y) => x + y);
+        if (difference < 0) {
+            for (let offset of positionOffsets) {
+                if (offset.position > offset.start && difference < 0) {
+                    offset.position++;
+                    offset.numberOfMessages--;
+                    difference++;
+                }
+            }
+        } else if (difference > 0) {
+            for (let offset of positionOffsets) {
+                if (offset.position < (offset.end - 1) && difference > 0) {
+                    offset.position--;
+                    offset.numberOfMessages++;
+                    difference--;
+                }
+            }
+        }
+
+        return positionOffsets;
     }
 
     public unsubscribe(connection: KafkaConnection, topic: Topic) {

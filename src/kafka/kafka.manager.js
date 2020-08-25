@@ -32,6 +32,8 @@ class KafkaManager {
 
     async getOffsets(name, topic) {
         let offsets = await this.connections[name].proxy.getOffsets(topic);
+        offsets.sort((a, b) => a.partition === b.partition? 0: a.partition < b.partition? -1 : 1);
+        console.log('offsets', topic, offsets);
         this.window.webContents.send('offsets', { name, topic, offsets });
     }
 
@@ -41,6 +43,8 @@ class KafkaManager {
     }
 
     async subscribe(name, topic, offsets) {
+        offsets.sort((a, b) => a.partition === b.partition? 0: a.partition < b.partition? -1 : 1);
+        console.log('subscribe', topic, offsets);
         await this.connections[name].proxy.subscribe(topic, offsets);
     }
 

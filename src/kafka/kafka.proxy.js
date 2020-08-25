@@ -1,4 +1,6 @@
 const { Kafka } = require('kafkajs')
+var os = require('os');
+
 
 class KafkaProxy {
 
@@ -11,7 +13,7 @@ class KafkaProxy {
         this.messages = [];
         this.subscriptions = null;
         this.kafka = new Kafka({
-            clientId: 'kafka-viewer-1',
+            clientId: 'kafka-viewer-2',
             brokers: this.brokers,
             connectionTimeout: 10000
         });
@@ -55,7 +57,7 @@ class KafkaProxy {
     }
 
     async subscribe(topic, offsets) {
-        let consumer = this.kafka.consumer({ groupId: 'kafka-viewer-' + topic });
+        let consumer = this.kafka.consumer({ groupId: 'kafka-viewer-' + os.userInfo().username + '-' + topic });
         await consumer.connect();
         await consumer.subscribe({ topic });
         consumer.run({ eachMessage: (x) => { this.consume(x) } });
@@ -81,7 +83,7 @@ class KafkaProxy {
         payload.message.topic = payload.topic;
         this.messages.push({
             topic: payload.topic,
-            key: payload.message.key,
+            key: payload.message.key? payload.message.key.toString() : undefined,
             size: content.length,
             offset: Number(payload.message.offset),
             partition: payload.partition,
