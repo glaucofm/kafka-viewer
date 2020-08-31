@@ -141,10 +141,10 @@ async function load() {
     // console.log(await proxy.getTopics());
     // console.log(await proxy.getOffsets('EXAMPLE.TOPIC.SOME.NAME.01'));
     await sleep(5000);
-    for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.03']) {
+    for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.01']) {
         let messages = [];
-        // for (let i = 0; i < 58; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
+        for (let i = 0; i < 5; i++)
+            messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
         // for (let i = 0; i < 107; i++)
         //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 1 });
         // for (let i = 0; i < 46; i++)
@@ -157,12 +157,13 @@ async function load() {
         //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
         // for (let i = 0; i < 20; i++)
         //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 0 });
-        for (let i = 0; i < 350; i++)
-            messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
+        // for (let i = 0; i < 350; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
         console.log('sending messages...');
         await proxy.producer.send({topic: topic, messages })
     }
     console.log('done');
+    process.exit();
 }
 
 function sleep(ms) {

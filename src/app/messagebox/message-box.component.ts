@@ -89,7 +89,7 @@ export class MessageBoxComponent {
 
     updateNotification(connection: KafkaConnection, topic: string) {
         let notification = this.messages.find(x => x.type == EventType.MESSAGES_TO_FETCH && x.connection == connection.name && x.topic == topic);
-        if (notification.userValues.fetching) {
+        if (notification && notification.userValues.fetching) {
             notification.userValues.fetching = false;
             notification.userValues.numOfMessages = 0;
             if (notification.userValues.numOfMessagesMore <= 0) {
