@@ -13,7 +13,7 @@
         </tr>
 
         <ng-container *ngFor="let message of messages">
-            <tr [class.new]="isNewMessage(message)">
+            <tr [class.new]="isNewMessage(message)" [class.newMore]="isNewAddedMoreMessage(message)">
 
                 <ng-container *ngIf="['subscribed-to-topic', 'messages-to-fetch'].indexOf(message.type) >= 0">
                     <td class="connection">{{ message.connection }}</td>
@@ -23,9 +23,19 @@
                             Loading messages of topic {{ message.topic }} from connection {{ message.connection }}... <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
                         </ng-container>
                         <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages > 0">
-                            Loading {{ message.userValues.numOfMessages }} messages of topic {{ message.topic }} from connection {{ message.connection }}... <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
+                            Loading {{ message.userValues.numOfMessages }} messages...
+                            <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
                         </ng-container>
-                        <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages == 0">
+                        <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages == 0 && message.userValues.numOfMessagesMore > 0">
+                            {{ message.userValues.numOfMessagesMore }} messages left on the topic.
+                            <span class="load-more" (click)="loadMoreMessages(message)">
+                                Load {{ configurationService.config.numberOfMessagesPerTopic < message.userValues.numOfMessagesMore? configurationService.config.numberOfMessagesPerTopic : message.userValues.numOfMessagesMore }} more.
+                            </span>
+                            <span class="dismiss" (click)="dismiss(message)">
+                                Dismiss
+                            </span>
+                        </ng-container>
+                        <ng-container *ngIf="message.type == 'messages-to-fetch' && message.userValues.numOfMessages == 0 && message.userValues.numOfMessagesMore == 0">
                             <span class="no-messages">
                                 No messages
                             </span>

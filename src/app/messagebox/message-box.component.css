@@ -14,6 +14,14 @@ div.message-box.dark-theme tr.new {
     background-color: #660;
 }
 
+div.message-box tr.newMore {
+    background-color: #FFFEC0;
+}
+
+div.message-box.dark-theme tr.newMore {
+    background-color: #770;
+}
+
 td.connection, td.topic, td.time, td.size {
     width: 1px;
     white-space: nowrap;
@@ -120,6 +128,20 @@ th.resizable:hover {
 
 span.no-messages {
     color: lightgray;
+}
+
+span.dismiss:hover {
+    color: orange;
+    cursor: pointer;
+}
+
+span.load-more:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+.dark-theme span.load-more:hover {
+    color: deepskyblue;
 }
 
 table.metadata {

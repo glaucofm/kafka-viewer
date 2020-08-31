@@ -71,11 +71,12 @@ ipcMain.on("get-offsets", async (event, data) => {
 // data: {
 //     name: string;
 //     topic: string;
-//     offsets: [{ partition: number, position: number }]
+//     offsets: [{ partition: number, position: number, end: number }],
+//     isLoadMore: boolean
 // }
 ipcMain.on("subscribe", async (event, data) => {
     console.log('subscribe', data);
-    kafkaManager.subscribe(data.name, data.topic, data.offsets);
+    kafkaManager.subscribe(data.name, data.topic, data.offsets, data.isLoadMore);
 });
 
 // data: {

@@ -1,6 +1,6 @@
 {
     "name": "kafka-viewer",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "main": "src/electron/main.js",
     "scripts": {
         "ng": "ng",
@@ -35,9 +35,9 @@
         "ngx-json-viewer": "^2.4.0",
         "ngx-moment": "^3.4.0",
         "purecss": "^1.0.1",
-        "rxjs": "~6.4.0",
+        "rxjs": "~6.5.5",
         "tslib": "^1.10.0",
-        "zone.js": "~0.9.1"
+        "zone.js": "~0.10.2"
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "~0.803.6",

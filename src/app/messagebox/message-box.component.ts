@@ -23,6 +23,7 @@ export class MessageBoxComponent {
     public showCopyMessage = false;
     public columns: Column[] = MessageBoxComponent.getInitialColumns();
     private widthSteps = [100, 25, 0];
+    private offsetsOfLoadMore = [];
 
     @ViewChildren(NgxJsonViewerComponent) components: QueryList<NgxJsonViewerComponent>;
 
@@ -36,11 +37,14 @@ export class MessageBoxComponent {
 
         EventService.emitter.subscribe((event: ApplicationEvent) => {
             if (event.type === EventType.MESSAGE) {
-                this.removeNotifications(event.data.connection.name, [... new Set(event.data.messages.map(x => x.topic))]);
+                for (let topic of [...new Set(event.data.messages.map(x => x.topic))]) {
+                    this.updateNotification(event.data.connection, topic.toString());
+                }
                 for (const message of event.data.messages) {
                     this.insertMessage(event.data.connection, message);
                 }
-                this.messages.sort((a, b) => a.timestamp == b.timestamp? 0 : a.timestamp > b.timestamp? 1 : -1).reverse();
+                this.messages.sort((a, b) =>
+                    a.timestamp == b.timestamp? (a.offset > b.offset? 1 : -1) : a.timestamp > b.timestamp? 1 : -1).reverse();
                 if (this.messages.length > this.configurationService.config.numberOfMessagesOnScreen) {
                     this.messages = this.messages.slice(0, this.configurationService.config.numberOfMessagesOnScreen);
                 }
@@ -52,13 +56,17 @@ export class MessageBoxComponent {
                 this.columns = event.data;
                 this.setUserValuesOnAllRows();
             } else if (event.type === EventType.SUBSCRIBED_TO_TOPIC || event.type === EventType.MESSAGES_TO_FETCH) {
-                console.log('-----', event.type, event.data);
                 this.removeNotifications(event.data.topic.connectionName, [ event.data.topic.name ]);
                 this.messages.unshift(this.getNotificationMessage(event.type, event.data));
-                if (event.type == EventType.MESSAGES_TO_FETCH && event.data.quantity == 0) {
-                    setTimeout(() => {
-                        this.removeNotifications(event.data.topic.connectionName, [ event.data.topic.name ]);
-                    }, 10000);
+                if (event.type == EventType.MESSAGES_TO_FETCH) {
+                    if (event.data.quantity == 0) {
+                        setTimeout(() => {
+                            this.removeNotifications(event.data.topic.connectionName, [event.data.topic.name]);
+                        }, 10000);
+                    }
+                    if (event.data.isLoadMore) {
+                        this.offsetsOfLoadMore.push(event.data);
+                    }
                 }
             }
         });
@@ -71,7 +79,6 @@ export class MessageBoxComponent {
         let currentWidth = column.width? column.width : column.naturalWidth;
         let nextWidth = this.widthSteps.filter(x => x < currentWidth)[0];
         column.width = nextWidth > 0? nextWidth : null;
-        console.log('column.width', column.naturalWidth, column.name, column.width);
     }
 
     removeNotifications(connection: string, topics: any[]) {
@@ -80,20 +87,48 @@ export class MessageBoxComponent {
         }
     }
 
+    updateNotification(connection: KafkaConnection, topic: string) {
+        let notification = this.messages.find(x => x.type == EventType.MESSAGES_TO_FETCH && x.connection == connection.name && x.topic == topic);
+        if (notification.userValues.fetching) {
+            notification.userValues.fetching = false;
+            notification.userValues.numOfMessages = 0;
+            if (notification.userValues.numOfMessagesMore <= 0) {
+                this.removeNotifications(connection.name, [ topic ]);
+            }
+        }
+    }
+
     getNotificationMessage(type, data): RowMessage {
-        console.log('getNotificationMessage', type, data);
         return {
             connection: data.topic.connectionName,
             topic: data.topic.name,
-            timestamp: moment(new Date(), 'UTC').format("YYYY-MM-DD HH:mm.ss"),
+            timestamp: moment(new Date(), 'UTC').add(7, 'days').format("YYYY-MM-DD HH:mm.ss"),
+            timestampAdded: moment(new Date(), 'UTC').add(7, 'days'),
             type: type,
-            userValues: { numOfMessages: data.quantity },
+            userValues: {
+                numOfMessages: data.quantity,
+                numOfMessagesMore: data.quantityMore,
+                offsets: data.offsets,
+                fetching: true,
+                isMore: false
+            },
             payload: '',
             size: 0,
             key: '',
             offset: 0,
             partition: 0,
         }
+    }
+
+    loadMoreMessages(notification: RowMessage) {
+        notification.userValues.numOfMessages = Math.min(this.configurationService.config.numberOfMessagesPerTopic, notification.userValues.numOfMessagesMore);
+        notification.userValues.fetching = true;
+        notification.userValues.numOfMessagesMore -= notification.userValues.numOfMessages;
+        this.kafkaService.subscribeFromOffsets(notification.connection, notification.topic, notification.userValues.offsets, true);
+    }
+
+    dismiss(notification: RowMessage) {
+        this.removeNotifications(notification.connection, [ notification.topic ]);
     }
 
     getNumberOfColumns() {
@@ -128,7 +163,13 @@ export class MessageBoxComponent {
             rowMessage.payload = rowMessage.payload.substr(0, 250);
         }
         this.setUserValues(rowMessage);
-        this.messages.push(rowMessage);
+        if (this.offsetsOfLoadMore.find(x => x.topic.connectionName == connection.name && x.topic.name == message.topic &&
+            x.offsetsLoadedMore.find(y => message.partition == y.partition && y.start <= message.offset && y.end >= message.offset))) {
+            rowMessage.timestampAdded = new Date().valueOf();
+        }
+        if (!this.messages.find(x => x.connection == rowMessage.connection && x.topic == rowMessage.topic && x.partition == rowMessage.partition && x.offset == rowMessage.offset)) {
+            this.messages.push(rowMessage);
+        }
     }
 
     setUserValuesOnAllRows() {
@@ -168,7 +209,11 @@ export class MessageBoxComponent {
     }
 
     isNewMessage(message: RowMessage) {
-        return new Date(message.timestamp).valueOf() + 60000 > (new Date().valueOf()) && message.type === 'message';
+        return message.type === 'message' && new Date(message.timestamp).valueOf() + 60000 > new Date().valueOf();
+    }
+
+    isNewAddedMoreMessage(message: RowMessage) {
+        return message.type === 'message' && !this.isNewMessage(message) && new Date(message.timestampAdded).valueOf() + 30000 > new Date().valueOf();
     }
 
     viewJSON(message) {

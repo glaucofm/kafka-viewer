@@ -32,7 +32,7 @@ export class KafkaService {
             } else if (event.type == EventType.TOPICS) {
                 _this.receiveTopics(event.data.name, event.data.topics);
             } else if (event.type == EventType.OFFSETS) {
-                _this.receiveOffsets(event.data.name, event.data.topic, event.data.offsets);
+                _this.subscribeFromOffsets(event.data.name, event.data.topic, event.data.offsets, event.data.isLoadMore);
             } else if (event.type == EventType.MESSAGES) {
                 _this.receiveMessages(event.data.name, event.data.messages);
             }
@@ -112,11 +112,33 @@ export class KafkaService {
         this.ipcService.send(EventType.GET_OFFSETS, { name: connection.name, topic: topic.name });
     }
 
-    public receiveOffsets(name: string, topic: string, offsets: Offset[]) {
-        let positionOffsets = this.calculatePositions(offsets, this.configurationService.config.numberOfMessagesPerTopic);
-        let numberOfMessagesToFetch = positionOffsets.map(x => x.numberOfMessages).reduce((x, y) => x + y)
-        EventService.emitter.emit({ type: EventType.MESSAGES_TO_FETCH, data: { topic: { connectionName: name, name: topic }, quantity: numberOfMessagesToFetch } });
-        this.ipcService.send(EventType.SUBSCRIBE, { name: name, topic, offsets: positionOffsets });
+    public subscribeFromOffsets(name: string, topic: string, offsets: Offset[], isLoadMore: boolean) {
+        let positions = this.calculatePositions(offsets, this.configurationService.config.numberOfMessagesPerTopic);
+        let numberOfMessagesToFetch = positions.map(x => x.numberOfMessages).reduce((x, y) => x + y);
+        let numberOfMessagesMore = positions.map(x => x.numberOfMessagesMore).reduce((x, y) => x + y);
+        EventService.emitter.emit({
+            type: EventType.MESSAGES_TO_FETCH,
+            data: {
+                topic: {
+                    connectionName: name,
+                    name: topic
+                },
+                quantity: numberOfMessagesToFetch,
+                quantityMore: numberOfMessagesMore,
+                offsets: positions.map(x => { return {
+                    partition: x.partition,
+                    start: x.start,
+                    end: Math.max(x.position - 1, 0),
+                }}),
+                offsetsLoadedMore: positions.map(x => { return {
+                    partition: x.partition,
+                    start: x.position,
+                    end: x.end
+                }}),
+                isLoadMore
+            }
+        });
+        this.ipcService.send(EventType.SUBSCRIBE, { name: name, topic, offsets: positions, isLoadMore });
         StorageService.save('subscribed-topics-' + name, this.getConnection(name).topics);
     }
 
@@ -125,21 +147,22 @@ export class KafkaService {
         if (totalMessages <= maxMessages) {
             return offsets.map(x => { return {
                 partition: x.partition,
+                start: x.start,
+                end: x.end,
                 position: x.start,
-                numberOfMessages: x.end - x.start
+                numberOfMessages: x.end - x.start + 1,
+                numberOfMessagesMore: 0
             }});
         }
-        let numPartitionsWithMessages = offsets.filter(x => x.end > x.start).length;
         let positionOffsets = [];
-
         for (let offset of offsets) {
             let numberOfMessages = Math.round((offset.end - offset.start) * (maxMessages / totalMessages));
             positionOffsets.push({
                 partition: offset.partition,
                 start: offset.start,
                 end: offset.end,
-                position: offset.end - numberOfMessages,
-                numberOfMessages
+                position: offset.end - numberOfMessages + 1,
+                numberOfMessages,
             })
         }
 
@@ -161,7 +184,9 @@ export class KafkaService {
                 }
             }
         }
-
+        for (let offset of positionOffsets) {
+            offset.numberOfMessagesMore = offset.position - offset.start;
+        }
         return positionOffsets;
     }
 

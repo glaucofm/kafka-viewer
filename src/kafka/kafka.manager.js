@@ -42,10 +42,9 @@ class KafkaManager {
         this.window.webContents.send('topics', { name, topics });
     }
 
-    async subscribe(name, topic, offsets) {
+    async subscribe(name, topic, offsets, isLoadMore) {
         offsets.sort((a, b) => a.partition === b.partition? 0: a.partition < b.partition? -1 : 1);
-        console.log('subscribe', topic, offsets);
-        await this.connections[name].proxy.subscribe(topic, offsets);
+        await this.connections[name].proxy.subscribe(topic, offsets, isLoadMore);
     }
 
     async unsubscribe(name, topic) {

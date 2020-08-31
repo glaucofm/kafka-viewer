@@ -7,6 +7,8 @@ class KafkaProxy {
     constructor(brokers) {
         this.brokers = brokers;
         this.messages = [];
+        this.stopPos = {};
+        this.counter = 1;
     }
 
     async connect() {
@@ -48,44 +50,67 @@ class KafkaProxy {
             let offsets = await admin.fetchTopicOffsets(topic);
             return offsets.map( x => { return {
                 partition: x.partition,
-                start: x.low,
-                end: x.high
+                start: Number(x.low),
+                end: Number(x.high) - 1
             }});
         } finally {
             await admin.disconnect();
         }
     }
 
-    async subscribe(topic, offsets) {
-        let consumer = this.kafka.consumer({ groupId: 'kafka-viewer-' + os.userInfo().username + '-' + topic });
+    async subscribe(topic, offsets, isLoadMore) {
+        let groupId = 'kafka-viewer-' + os.userInfo().username + '-' + topic + (isLoadMore? '_loadmore_' + this.counter : '');
+        if (isLoadMore) {
+            this.stopPos[groupId] = {};
+            this.counter++;
+            for (let offset of offsets) {
+                this.stopPos[groupId][offset.partition] = {
+                    stopAt: offset.end,
+                    isFinished: false
+                };
+            }
+        }
+        let consumer = this.kafka.consumer({ groupId: groupId });
         await consumer.connect();
         await consumer.subscribe({ topic });
-        consumer.run({ eachMessage: (x) => { this.consume(x) } });
+        await consumer.run({ eachMessage: (x) => { this.consume(x, groupId, isLoadMore) } });
+        console.log('Loading', offsets.map(x => x.numberOfMessages).reduce((x, y) => x + y), 'messages');
         for (let offset of offsets) {
             consumer.seek({ topic, partition: offset.partition, offset: offset.position });
         }
-        this.consumers.push({ topic, consumer });
+        this.consumers.push({ topic, consumer, groupId, isLoadMore });
     }
 
-    async unsubscribe(topic) {
-        let consumer = this.consumers.find(x => x.topic === topic);
-        await consumer.consumer.disconnect();
-        this.consumers = this.consumers.filter(x => x.topic !== topic);
+    async unsubscribe(topic, groupId) {
+        let consumer = this.consumers.find(x => x.topic === topic && (!groupId || x.groupId === groupId));
+        if (consumer) {
+            await consumer.consumer.disconnect();
+            this.consumers = this.consumers.filter(x => x.topic !== topic);
+        }
     }
 
     async produce(topic, message) {
         await this.producer.send({ topic, messages: [ message ] });
     }
 
-    consume(payload) {
+    async consume(payload, groupId, isLoadMore) {
         let content = payload.message.value.toString();
-        console.log('Received message: partition', payload.partition, 'offset', payload.message.offset, 'content', content.length, 'chars');
+        let offset = Number(payload.message.offset);
+        if (isLoadMore) {
+            if (offset > this.stopPos[groupId][payload.partition].stopAt) {
+                this.stopPos[groupId][payload.partition].isFinished = true;
+                if (Object.keys(this.stopPos[groupId]).filter(x => !this.stopPos[groupId][x].isFinished).length === 0) {
+                    this.unsubscribe(payload.topic, groupId);
+                }
+                return;
+            }
+        }
         payload.message.topic = payload.topic;
         this.messages.push({
             topic: payload.topic,
             key: payload.message.key? payload.message.key.toString() : undefined,
             size: content.length,
-            offset: Number(payload.message.offset),
+            offset: offset,
             partition: payload.partition,
             timestamp: Number(payload.message.timestamp),
             payload: content,
@@ -94,6 +119,15 @@ class KafkaProxy {
     }
 
     offloadMessages() {
+        if (this.messages.length > 0) {
+            console.log('Sending', this.messages.length, 'messages to the screen.');
+            let partitions = [...new Set(this.messages.map(x => x.partition))].sort();
+            console.log(partitions.map(partition => {
+                return partition + ': ' +
+                    Math.min(...this.messages.filter(message => message.partition === partition).map(x => x.offset)) + ' ' +
+                    Math.max(...this.messages.filter(message => message.partition === partition).map(x => x.offset))
+            }).join('\n'));
+        }
         return this.messages.splice(0, this.messages.length);
     }
 
@@ -101,19 +135,30 @@ class KafkaProxy {
 
 module.exports = KafkaProxy;
 
-async function main() {
-    let proxy = new KafkaProxy([ '192.168.58.159:9092' ]);
+async function load() {
+    let proxy = new KafkaProxy([ 'localhost:9092' ]);
     await proxy.connect();
     // console.log(await proxy.getTopics());
     // console.log(await proxy.getOffsets('EXAMPLE.TOPIC.SOME.NAME.01'));
     await sleep(5000);
-    for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.02']) {
+    for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.03']) {
         let messages = [];
-        for (let i = 0; i < 10; i++) {
-            messages.push({
-                value: '{ "myIndex": ' + i + ' }'
-            });
-        }
+        // for (let i = 0; i < 58; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
+        // for (let i = 0; i < 107; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 1 });
+        // for (let i = 0; i < 46; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 2 }), partition: 2 });
+        // for (let i = 0; i < 189; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 3 }), partition: 3 });
+        // for (let i = 0; i < 238; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 4 }), partition: 4 });
+        // for (let i = 0; i < 20; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
+        // for (let i = 0; i < 20; i++)
+        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 0 });
+        for (let i = 0; i < 350; i++)
+            messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
         console.log('sending messages...');
         await proxy.producer.send({topic: topic, messages })
     }
@@ -126,5 +171,7 @@ function sleep(ms) {
     });
 }
 
-// main();
+if (process.argv.length >= 3 && process.argv[2] === 'load') {
+    load();
+}
 

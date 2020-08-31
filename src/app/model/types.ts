@@ -44,7 +44,8 @@ export interface KafkaMessage {
     topic: string,
     offset: number,
     partition: number,
-    timestamp: string,
+    timestamp: number,
+    timestampAdded: number,
     headers?: string[][]
 }
 
