@@ -79,7 +79,7 @@ export class TopbarComponent {
             this.editingConnection = connection;
             this.oldConnection = JSON.parse(JSON.stringify(connection));
         } else {
-            this.editingConnection = {brokers: '', name: ''};
+            this.editingConnection = {brokers: '', name: '', useJavaProxy: false };
         }
         this.closeMenu('menu-connections');
     }

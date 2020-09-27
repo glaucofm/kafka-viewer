@@ -3,7 +3,8 @@ export interface KafkaConnection {
     name: string;
     brokers: string;
     topics?: Topic[];
-    isConnected?: boolean
+    isConnected?: boolean;
+    useJavaProxy: boolean;
 }
 
 export interface Topic {

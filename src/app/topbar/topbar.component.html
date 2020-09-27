@@ -51,6 +51,10 @@
                                     <input id="brokers" name="newConnection.brokers" type="text" class="pure-input-1" [(ngModel)]="editingConnection.brokers" placeholder="192.168.1.1:9092,192.168.1.2:9092,...">
                                     <label for="name">Name</label>
                                     <input id="name" name="newConnection.name" type="text" class="pure-input-1" [(ngModel)]="editingConnection.name" placeholder="Give it a ame to identify it here">
+                                    <label for="name">
+                                        <input id="javaproxy" name="newConnection.useJavaProxy" type="checkbox" class="" [(ngModel)]="editingConnection.useJavaProxy" />
+                                        Use Java Proxy
+                                    </label>
                                     <button type="submit" class="pure-button pure-button-primary">Save</button>
                                 </fieldset>
                             </form>

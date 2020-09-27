@@ -1,6 +1,6 @@
 {
     "name": "kafka-viewer",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "main": "src/electron/main.js",
     "scripts": {
         "ng": "ng",
@@ -34,6 +34,7 @@
         "moment-timezone": "0.x",
         "ngx-json-viewer": "^2.4.0",
         "ngx-moment": "^3.4.0",
+        "node-fetch": "^2.6.1",
         "purecss": "^1.0.1",
         "rxjs": "~6.5.5",
         "tslib": "^1.10.0",
@@ -131,6 +132,7 @@
             "node_modules/nan",
             "node_modules/napi-build-utils",
             "node_modules/nested-error-stacks",
+            "node_modules/node-fetch",
             "node_modules/npmlog",
             "node_modules/object-assign",
             "node_modules/object-inspect",
@@ -181,7 +183,9 @@
             "icon": "icon.ico",
             "artifactName": "kafka-viewer_setup_${version}.${ext}"
         },
-        "extraFiles": [],
+        "extraFiles": [
+            "lib"
+        ],
         "nsis": {
             "oneClick": false,
             "runAfterFinish": true,

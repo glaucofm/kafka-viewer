@@ -50,7 +50,7 @@ app.on('activate', function () {
 // }
 ipcMain.on("connect", async (event, data) => {
     console.log('connect', data);
-    kafkaManager.connect(data.name, data.brokers);
+    kafkaManager.connect(data.name, data.brokers, data.useJavaProxy);
 });
 
 // data: string

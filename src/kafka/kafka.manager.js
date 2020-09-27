@@ -1,24 +1,30 @@
 const { ipcMain } = require('electron');
 const KafkaProxy = require("./kafka.proxy.js");
+const KafkaBridge = require("./kafka.java.proxy.js");
+const fetch = require('node-fetch');
 
 class KafkaManager {
 
     constructor(window) {
         this.connections = {};
         this.window = window;
-        setInterval(() => {
-            this.offloadMessages();
+        setInterval(async () => {
+            await this.offloadMessages();
         }, 500);
-
     }
 
-    async connect(name, brokers) {
+    async connect(name, brokers, useJavaProxy) {
         console.log('New connection to ' + brokers + ' named ' + name);
-        let proxy = new KafkaProxy(brokers.split(','));
+        let proxy = undefined;
+        if (useJavaProxy) {
+            await this.startJavaProxy();
+            proxy = new KafkaBridge(name, brokers);
+        } else {
+            proxy = new KafkaProxy(brokers.split(','));
+        }
         await proxy.connect();
         this.connections[name] = {
-            proxy: proxy,
-            subscriptions: []
+            proxy: proxy
         };
         this.window.webContents.send('connected', name);
         this.getTopics(name);
@@ -52,19 +58,60 @@ class KafkaManager {
     }
 
     async publish(name, topic, message) {
+        message.payload = message.value;
         await this.connections[name].proxy.produce(topic, message);
     }
 
-    offloadMessages() {
+    async offloadMessages() {
         for (let name of Object.keys(this.connections)) {
-            let messages = this.connections[name].proxy.offloadMessages();
+            let messages = await this.connections[name].proxy.offloadMessages();
             if (messages && messages.length > 0) {
                 this.window.webContents.send('messages', { name, messages });
             }
         }
     }
 
+    async startJavaProxy() {
+        let appPath = require('electron').app.getAppPath();
+        let jarPath = appPath + '\\lib\\kafka-admin.jar';
+        if (appPath.endsWith('app.asar')) {
+            jarPath = appPath + '\\..\\..\\lib\\kafka-admin.jar';
+        }
+        console.log("Starting Java proxy path at ", jarPath);
+        if (await this.isJavaProxyUp()) {
+            return;
+        }
+        let child = require('child_process').spawn('java', ['-jar', jarPath] );
+        child.stdout.on('data', data => process.stdout.write(data.toString()));
+        child.stderr.on('data', data => process.stdout.write(data.toString()));
+        await sleep(3000);
+        let i = 0;
+        while (!(await this.isJavaProxyUp())) {
+            console.log('Waiting Java proxy finish start up...');
+            await sleep(1000);
+            i++;
+            if (i > 30) {
+                throw 'Could not start Java bridge. Check if Java is on the path.';
+            }
+        }
+    }
+
+    async isJavaProxyUp() {
+        try {
+            if (await (await fetch('http://localhost:7980/api/admin')).text()) {
+                return true;
+            }
+        } catch (e) {
+        }
+        return false;
+    }
+
 }
 
 module.exports = KafkaManager;
 
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}

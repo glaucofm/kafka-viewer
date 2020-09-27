@@ -118,7 +118,7 @@ class KafkaProxy {
         });
     }
 
-    offloadMessages() {
+    async offloadMessages() {
         if (this.messages.length > 0) {
             console.log('Sending', this.messages.length, 'messages to the screen.');
             let partitions = [...new Set(this.messages.map(x => x.partition))].sort();
@@ -138,27 +138,13 @@ module.exports = KafkaProxy;
 async function load() {
     let proxy = new KafkaProxy([ 'localhost:9092' ]);
     await proxy.connect();
-    // console.log(await proxy.getTopics());
-    // console.log(await proxy.getOffsets('EXAMPLE.TOPIC.SOME.NAME.01'));
     await sleep(5000);
     for (let topic of ['EXAMPLE.TOPIC.SOME.NAME.01']) {
         let messages = [];
-        for (let i = 0; i < 5; i++)
-            messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
-        // for (let i = 0; i < 107; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 1 });
-        // for (let i = 0; i < 46; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 2 }), partition: 2 });
-        // for (let i = 0; i < 189; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 3 }), partition: 3 });
-        // for (let i = 0; i < 238; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 4 }), partition: 4 });
-        // for (let i = 0; i < 20; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
-        // for (let i = 0; i < 20; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 1 }), partition: 0 });
-        // for (let i = 0; i < 350; i++)
-        //     messages.push({ value: JSON.stringify({ somevar: i, partition: 0 }), partition: 0 });
+        for (let i = 0; i < 50; i++) {
+            let partition = Math.floor(Math.random() * Math.floor(5));
+            messages.push({value: JSON.stringify({ somevar: i, partition}), partition });
+        }
         console.log('sending messages...');
         await proxy.producer.send({topic: topic, messages })
     }

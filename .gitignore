@@ -6,9 +6,16 @@
 /out-tsc
 # Only exists if Bazel was run
 /bazel-out
+/*.zip
 
 # dependencies
 /node_modules
+
+#java proxy
+/java-proxy/.idea
+/java-proxy/.mvn
+/java-proxy/*.iml
+/java-proxy/target
 
 # profiling files
 chrome-profiler-events*.json
@@ -18,18 +25,8 @@ speed-measure-plugin*.json
 /.idea
 .project
 .classpath
-.c9/
-*.launch
 .settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+*.iml
 
 # misc
 /.sass-cache
