@@ -44,6 +44,7 @@ public class AdminService {
                     .listTopics().listings().get().stream()
                     .filter(x -> !x.isInternal())
                     .map(x -> x.name())
+                    .sorted()
                     .collect(Collectors.toList()));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -144,7 +145,7 @@ public class AdminService {
                             return;
                         }
                     } else {
-                        System.out.println(name + ", " + topic + ": " + record.partition() + ", " + record.offset() + ", " + record.value());
+                        System.out.println(name + ", " + topic + ": " + record.partition() + ", " + record.offset());
                         connections.get(name).getMessages().add(convertToMessage(record));
                     }
                 }
@@ -168,7 +169,7 @@ public class AdminService {
     private KafkaConsumer<String, String> getConsumer(String name, String topic, String extension) {
         Properties props = new Properties();
         props.put("bootstrap.servers", connections.get(name).getBrokers());
-        props.put("group.id", name + "-" + topic + "-" + System.getProperty("USERNAME") + "-" + extension);
+        props.put("group.id", name + "-" + topic + "-" + System.getenv("USERNAME") + "-" + extension);
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");
