@@ -51,10 +51,10 @@
                                     <input id="brokers" name="newConnection.brokers" type="text" class="pure-input-1" [(ngModel)]="editingConnection.brokers" placeholder="192.168.1.1:9092,192.168.1.2:9092,...">
                                     <label for="name">Name</label>
                                     <input id="name" name="newConnection.name" type="text" class="pure-input-1" [(ngModel)]="editingConnection.name" placeholder="Give it a ame to identify it here">
-                                    <label for="name">
-                                        <input id="javaproxy" name="newConnection.useJavaProxy" type="checkbox" class="" [(ngModel)]="editingConnection.useJavaProxy" />
-                                        Use Java Proxy
-                                    </label>
+<!--                                    <label for="name">-->
+<!--                                        <input id="javaproxy" name="newConnection.useJavaProxy" type="checkbox" class="" [(ngModel)]="editingConnection.useJavaProxy" />-->
+<!--                                        Use Java Proxy-->
+<!--                                    </label>-->
                                     <button type="submit" class="pure-button pure-button-primary">Save</button>
                                 </fieldset>
                             </form>
@@ -93,8 +93,8 @@
                                                 <td>
                                                     <a (click)="toggleUnselectedTopicsOpen(connection)" class="toggle" style="margin-left: -10px">
                                                         <i class="far fa-plus-square"
-                                                           [class.fa-plus-square]="!areUnselectedTopicsOpen(connection)"
-                                                           [class.fa-minus-square]="areUnselectedTopicsOpen(connection)">
+                                                           [class.fa-plus-square]="!areUnpreferredTopicsOpen(connection)"
+                                                           [class.fa-minus-square]="areUnpreferredTopicsOpen(connection)">
                                                         </i>
                                                     </a>
                                                 </td>
@@ -102,9 +102,9 @@
                                         </table>
                                     </td>
                                 </tr>
-                                <ng-container *ngFor="let status of ['selected', 'unselected']">
-                                    <ng-container  *ngIf="status == 'selected' || areUnselectedTopicsOpen(connection)">
-                                        <tr *ngFor="let topic of getTopics(connection, status == 'selected')" class="{{ status }}">
+                                <ng-container *ngFor="let type of ['preferred', 'unpreferred']">
+                                    <ng-container  *ngIf="type == 'preferred' || areUnpreferredTopicsOpen(connection)">
+                                        <tr *ngFor="let topic of getTopics(connection, type == 'preferred')" class="{{ topic.isSelected? 'selected' : 'unselected' }}">
                                             <td style="min-width: 20px">
                                                 &nbsp;
                                             </td>
@@ -119,6 +119,15 @@
                                                 </a>
                                             </td>
                                         </tr>
+                                        <ng-container  *ngIf="type == 'preferred' && areUnpreferredTopicsOpen(connection) && getTopics(connection, type == 'preferred').length > 0">
+                                            <tr>
+                                                <td></td>
+                                                <td style="color: silver; margin-left: 12px;">
+                                                    <hr size="1" noshade>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </ng-container>
                                     </ng-container>
                                 </ng-container>
                             </ng-container>
@@ -224,9 +233,23 @@
                                 <input type="text" class="pure-input-1" [(ngModel)]="configurationService.config.numberOfMessagesOnScreen">
                             </div>
                         </div>
+                        <div class="row">
+                            <div>Messages table font size</div>
+                            <div>
+                                <input type="text" class="pure-input-1" [(ngModel)]="configurationService.config.fontSize">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </li>
+
+            <li class="pure-menu-item filter">
+                <div class="filter" [class.active]="isFiltering">
+                    <i class="fa fa-search"></i>
+                    <input id="filter" name="filter" type="text" class="pure-input-1" [(ngModel)]="filterText" placeholder="" (keyup.enter)="setFilter()">
+                </div>
+            </li>
+
         </ul>
     </div>
 

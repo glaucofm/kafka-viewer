@@ -13,12 +13,13 @@
         </tr>
 
         <ng-container *ngFor="let message of messages">
-            <tr [class.new]="isNewMessage(message)" [class.newMore]="isNewAddedMoreMessage(message)">
+            <ng-container *ngIf="!message.isFilteredOut">
+                <tr [class.new]="isNewMessage(message)" [class.newMore]="isNewAddedMoreMessage(message)">
 
                 <ng-container *ngIf="['subscribed-to-topic', 'messages-to-fetch'].indexOf(message.type) >= 0">
-                    <td class="connection">{{ message.connection }}</td>
-                    <td class="topic">{{ message.topic }}</td>
-                    <td class="notification" [attr.colspan]="getNumberOfColumns() - 2">
+                    <td class="connection" [style.font-size.px]="configurationService.config.fontSize">{{ message.connection }}</td>
+                    <td class="topic" [style.font-size.px]="configurationService.config.fontSize">{{ message.topic }}</td>
+                    <td class="notification" [attr.colspan]="getNumberOfColumns() - 2" [style.font-size.px]="configurationService.config.fontSize">
                         <ng-container *ngIf="message.type == 'subscribed-to-topic'">
                             Loading messages of topic {{ message.topic }} from connection {{ message.connection }}... <img src="./assets/images/spinner-icon-0.gif" style="height: 16px; line-height: 16px">
                         </ng-container>
@@ -47,25 +48,30 @@
                     <ng-container *ngFor="let column of columns">
                         <ng-container *ngIf="column.isEnabled" [ngSwitch]="column.name">
 
-                            <td *ngSwitchCase="'Connection'" [className]="column.width? 'connection width-' + column.width : 'connection'">{{ message.connection }}</td>
-
-                            <td *ngSwitchCase="'Topic'" [className]="column.width? 'topic width-' + column.width : 'topic'">
-                                {{ message.topic }}
+                            <td *ngSwitchCase="'Connection'" [className]="column.width? 'connection width-' + column.width : 'connection'" [style.font-size.px]="configurationService.config.fontSize">
+                                {{ message.connection }}
                             </td>
 
-                            <td *ngSwitchCase="'Size'" [className]="column.width? 'size width-' + column.width : 'size'">{{ message.formattedSize }}</td>
+                            <td *ngSwitchCase="'Topic'" [className]="column.width? 'topic width-' + column.width : 'topic'" [style.font-size.px]="configurationService.config.fontSize">
+                                T {{ message.topic }}
+                            </td>
+
+                            <td *ngSwitchCase="'Size'" [className]="column.width? 'size width-' + column.width : 'size'" [style.font-size.px]="configurationService.config.fontSize">
+                                {{ message.formattedSize }}
+                            </td>
 
                             <td *ngSwitchCase="'Published'" [className]="column.width? 'time width-' + column.width : 'time'"
-                                (click)="showTimeAgo = !showTimeAgo" [style.cursor]="'pointer'">
-                                <ng-container *ngIf="showTimeAgo">
+                                (click)="configurationService.config.showTimeAgo = !configurationService.config.showTimeAgo" [style.cursor]="'pointer'"
+                                [style.font-size.px]="configurationService.config.fontSize">
+                                <ng-container *ngIf="configurationService.config.showTimeAgo">
                                     {{ message.timestamp | amTimeAgo }}
                                 </ng-container>
-                                <ng-container *ngIf="!showTimeAgo">
+                                <ng-container *ngIf="!configurationService.config.showTimeAgo">
                                     {{ message.formattedTimestamp }}
                                 </ng-container>
                             </td>
 
-                            <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200">
+                            <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200" [style.font-size]="configurationService.config.fontSize">
                                 <ng-container *ngIf="!message.json && !message.formattedJson && !message.metadataOpen">
                                     <span class="show-json" (click)="viewJSON(message)">
                                         JSON
@@ -119,7 +125,7 @@
                                 </ng-container>
                             </td>
 
-                            <td *ngIf="column.isUserDefined" [className]="column.width? 'user width-' + column.width : 'user'">
+                            <td *ngIf="column.isUserDefined" [className]="column.width? 'user width-' + column.width : 'user'" [style.font-size]="configurationService.config.fontSize">
                                 {{ message.userValues[column.name] }}
                             </td>
 
@@ -127,6 +133,7 @@
                     </ng-container>
                 </ng-container>
             </tr>
+            </ng-container>
         </ng-container>
 
     </table>

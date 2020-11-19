@@ -1,9 +1,14 @@
+
 div.message-box {
     padding: 0px 20px 20px 20px;
 }
 
 div.message-box table.messages {
     width: 100%;
+}
+
+div.message-box table.messages td {
+    font-size: 14px;
 }
 
 div.message-box tr.new {

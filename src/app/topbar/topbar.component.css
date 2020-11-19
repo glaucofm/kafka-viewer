@@ -263,3 +263,39 @@ textarea.publish {
     margin-top: 10px;
 }
 
+div.filter {
+    padding: 0px 20px;
+}
+
+div.filter input {
+    border: 0px solid gray;
+    font-size: 14px;
+    padding: 6px 8px;
+    width: 500px;
+    color: #606060;
+}
+
+div.filter input:focus, div.filter input:hover {
+    background-color: #F0F0F0;
+}
+
+div.filter i:hover + input {
+    background-color: #F0F0F0;
+}
+
+div.filter i {
+    color: silver;
+    margin-right: 5px;
+}
+
+div.filter.active i {
+    color: lightgreen;
+}
+
+div.filter.active input {
+    color: blue;
+}
+
+.dark-theme div.filter input:focus, .dark-theme div.filter input:hover {
+    background-color: #333333;
+}

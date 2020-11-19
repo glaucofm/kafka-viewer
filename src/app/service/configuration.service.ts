@@ -10,7 +10,9 @@ export class ConfigurationService {
 
     public config = {
         numberOfMessagesPerTopic: 100,
-        numberOfMessagesOnScreen: 500
+        numberOfMessagesOnScreen: 500,
+        fontSize: 12,
+        showTimeAgo: true
     };
 
     private currentConfigForComparison = JSON.stringify(this.config);
@@ -28,6 +30,12 @@ export class ConfigurationService {
             StorageService.save('config', config);
         } else {
             this.config = config;
+            if (!this.config.fontSize) {
+                this.config.fontSize = 12;
+            }
+            if (this.config.showTimeAgo === undefined) {
+                this.config.showTimeAgo = true;
+            }
         }
     }
 

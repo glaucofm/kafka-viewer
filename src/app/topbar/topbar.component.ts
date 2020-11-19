@@ -19,6 +19,8 @@ export class TopbarComponent {
     public oldConnection: KafkaConnection;
     public columns: Column[] = MessageBoxComponent.getInitialColumns();
     public oldColumns: string = '';
+    public filterText: string = '';
+    public isFiltering: boolean;
 
     public topicMenu: {
         [key: string]: {
@@ -39,7 +41,8 @@ export class TopbarComponent {
         value: ''
     };
 
-    constructor(kafkaService: KafkaService, configurationService: ConfigurationService) {
+    constructor(kafkaService: KafkaService,
+                configurationService: ConfigurationService) {
         this.kafkaService = kafkaService;
         this.configurationService = configurationService;
 
@@ -91,11 +94,16 @@ export class TopbarComponent {
 
     toggleTopic(connection: KafkaConnection, topic: Topic) {
         topic.isSelected = !topic.isSelected;
+        topic.isPreferred = true;
         if (topic.isSelected) {
             this.kafkaService.subscribe(connection, topic);
         } else {
             this.kafkaService.unsubscribe(connection, topic);
         }
+        if (!connection.preferredTopics.includes(topic.name)) {
+            connection.preferredTopics.push(topic.name);
+        }
+        this.kafkaService.saveConnection(connection);
     }
 
     openPublishModal(connection: KafkaConnection, topic: Topic) {
@@ -128,11 +136,11 @@ export class TopbarComponent {
         }, 200);
     }
 
-    getTopics(connection: KafkaConnection, selected: boolean) {
-        return connection.topics.filter(x => selected ? x.isSelected : !x.isSelected);
+    getTopics(connection: KafkaConnection, preferred: boolean) {
+        return connection.topics.filter(x => preferred ? x.isPreferred : !x.isPreferred);
     }
 
-    areUnselectedTopicsOpen(connection: KafkaConnection): boolean {
+    areUnpreferredTopicsOpen(connection: KafkaConnection): boolean {
         if (!this.topicMenu[connection.name]) {
             this.topicMenu[connection.name] = {
                 isOpen: false,
@@ -184,5 +192,11 @@ export class TopbarComponent {
 
     setTheme(theme) {
         this.configurationService.setTheme({ name: theme });
+    }
+
+    setFilter() {
+        this.isFiltering = this.filterText.length > 0;
+        console.log(this.isFiltering);
+        EventService.emitter.emit({ type: EventType.SET_FILTER, data: this.filterText });
     }
 }

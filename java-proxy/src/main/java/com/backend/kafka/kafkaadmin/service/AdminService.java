@@ -169,7 +169,7 @@ public class AdminService {
     private KafkaConsumer<String, String> getConsumer(String name, String topic, String extension) {
         Properties props = new Properties();
         props.put("bootstrap.servers", connections.get(name).getBrokers());
-        props.put("group.id", name + "-" + topic + "-" + System.getenv("USERNAME") + "-" + extension);
+        props.put("group.id", "kafka-viewer_" + System.getenv("USERNAME") + "_" + UUID.randomUUID().toString());
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");

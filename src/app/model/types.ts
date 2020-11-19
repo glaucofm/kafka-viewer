@@ -5,11 +5,13 @@ export interface KafkaConnection {
     topics?: Topic[];
     isConnected?: boolean;
     useJavaProxy: boolean;
+    preferredTopics?: string[];
 }
 
 export interface Topic {
     name: string;
     isSelected: boolean;
+    isPreferred: boolean;
     connectionName?: string
 }
 
@@ -30,7 +32,8 @@ export enum EventType {
     UNSUBSCRIBE = 'unsubscribe',
     PUBLISH = 'publish',
     CONNECT = 'connect',
-    CONNECTED = 'connected'
+    CONNECTED = 'connected',
+    SET_FILTER = 'SET_FILTER'
 }
 
 export interface ApplicationEvent {
@@ -72,7 +75,8 @@ export interface RowMessage extends KafkaMessage {
     metadataOpen?: boolean;
     userValues?: {
         [key: string]: any;
-    },
+    };
+    isFilteredOut?: boolean;
 }
 
 export interface TopicsEvent {

@@ -36,8 +36,9 @@ class KafkaProxy {
         const admin = this.kafka.admin();
         await admin.connect();
         try {
-            let response = await admin.fetchTopicMetadata();
-            return response.topics.filter(x => !x.name.startsWith("_")).map(x => x.name).sort();
+            return (await admin.listTopics()).filter(x => !x.startsWith("_")).sort();
+        } catch (e) {
+            console.log(e);
         } finally {
             await admin.disconnect();
         }

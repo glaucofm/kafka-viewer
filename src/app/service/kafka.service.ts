@@ -20,6 +20,10 @@ export class KafkaService {
         }
         for (const connection of this.connections) {
             connection.isConnected = false;
+            connection.topics = [];
+            if (connection.preferredTopics === undefined) {
+                connection.preferredTopics = [];
+            }
         }
         this.subscribeToEvents();
     }
@@ -60,7 +64,7 @@ export class KafkaService {
 
     private receiveTopics(name: string, topics: string[]) {
         let connection = this.getConnection(name);
-        connection.topics = topics.map(x => { return { name: x, isSelected: false, connectionName: connection.name }});
+        connection.topics = topics.map(x => { return { name: x, isSelected: false, isPreferred: connection.preferredTopics && connection.preferredTopics.includes(x), connectionName: connection.name }});
         setTimeout(() => {
             this.restoreSelectedTopics(connection);
         }, 200);
@@ -88,9 +92,10 @@ export class KafkaService {
         }
         for (const topic of connection.topics) {
             let topics: Topic[] = storedTopics.filter(x => x.name == topic.name);
-            if (topics.length > 0 && topics[0].isSelected) {
-                topic.isSelected = true;
-                this.subscribe(connection, topics[0]);
+            if (topics.length > 0 && (topics[0].isSelected || topics[0].isPreferred)) {
+                topic.isSelected = false;
+                topic.isPreferred = true;
+                // this.subscribe(connection, topics[0]);
             }
         }
     }

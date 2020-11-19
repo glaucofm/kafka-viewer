@@ -19,11 +19,11 @@ export class MessageBoxComponent {
     public kafkaService: KafkaService;
     public configurationService: ConfigurationService;
     public messages: RowMessage[] = [];
-    public showTimeAgo = true;
     public showCopyMessage = false;
     public columns: Column[] = MessageBoxComponent.getInitialColumns();
     private widthSteps = [100, 25, 0];
     private offsetsOfLoadMore = [];
+    private filterText: string = '';
 
     @ViewChildren(NgxJsonViewerComponent) components: QueryList<NgxJsonViewerComponent>;
 
@@ -68,6 +68,8 @@ export class MessageBoxComponent {
                         this.offsetsOfLoadMore.push(event.data);
                     }
                 }
+            } else if (event.type === EventType.SET_FILTER) {
+                this.setFilter(event.data);
             }
         });
     }
@@ -170,6 +172,7 @@ export class MessageBoxComponent {
         if (!this.messages.find(x => x.connection == rowMessage.connection && x.topic == rowMessage.topic && x.partition == rowMessage.partition && x.offset == rowMessage.offset)) {
             this.messages.push(rowMessage);
         }
+        rowMessage.isFilteredOut = !(this.filterText.length == 0 || this.filterText == rowMessage.topic || rowMessage.completePayload.indexOf(this.filterText) >= 0);
     }
 
     setUserValuesOnAllRows() {
@@ -188,7 +191,11 @@ export class MessageBoxComponent {
                     let header = row.headers.find(x => x[0] == column.jsonPath.replace(/^headers./, ''));
                     row.userValues[column.name] = header? header[1] : '';
                 } else {
-                    row.userValues[column.name] = this.extractColumnValue(row, column);
+                    let values = this.extractColumnValue(row, column);
+                    if (column.jsonPath == '$.messageAction') {
+                        console.log(row, values, column);
+                    }
+                    row.userValues[column.name] = values.join(", ");
                 }
             }
         }
@@ -252,5 +259,12 @@ export class MessageBoxComponent {
         setTimeout(() => {
             this.showCopyMessage = false;
         }, 10000);
+    }
+
+    public setFilter(filterText: string) {
+        this.filterText = filterText;
+        for (let message of this.messages) {
+            message.isFilteredOut = !(filterText.length == 0 || filterText == message.topic || message.completePayload.indexOf(filterText) >= 0);
+        }
     }
 }
