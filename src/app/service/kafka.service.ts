@@ -73,6 +73,7 @@ export class KafkaService {
     public disconnect(connection: KafkaConnection) {
         this.ipcService.send(EventType.DISCONNECT, connection.name);
         connection.isConnected = false;
+        connection.topics = [];
         this.activeConnections = this.connections.filter(x => x.isConnected);
         EventService.emitter.emit({ type: EventType.DISCONNECT, data: connection });
     }

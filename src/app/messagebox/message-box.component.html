@@ -53,7 +53,7 @@
                             </td>
 
                             <td *ngSwitchCase="'Topic'" [className]="column.width? 'topic width-' + column.width : 'topic'" [style.font-size.px]="configurationService.config.fontSize">
-                                T {{ message.topic }}
+                                {{ message.topic }}
                             </td>
 
                             <td *ngSwitchCase="'Size'" [className]="column.width? 'size width-' + column.width : 'size'" [style.font-size.px]="configurationService.config.fontSize">
@@ -125,7 +125,7 @@
                                 </ng-container>
                             </td>
 
-                            <td *ngIf="column.isUserDefined" [className]="column.width? 'user width-' + column.width : 'user'" [style.font-size]="configurationService.config.fontSize">
+                            <td *ngIf="column.isUserDefined" [style.font-size]="configurationService.config.fontSize" [className]="column.width? 'user width-' + column.width : 'user'">
                                 {{ message.userValues[column.name] }}
                             </td>
 

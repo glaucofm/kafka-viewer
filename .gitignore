@@ -27,6 +27,7 @@ speed-measure-plugin*.json
 .classpath
 .settings/
 *.iml
+.gradle/
 
 # misc
 /.sass-cache
@@ -41,3 +42,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+/java-proxy/target/
+/java-proxy/out/
+/java-proxy/mvnw/

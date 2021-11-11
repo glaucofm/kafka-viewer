@@ -15,7 +15,7 @@ class KafkaProxy {
         this.messages = [];
         this.subscriptions = null;
         this.kafka = new Kafka({
-            clientId: 'kafka-viewer-2',
+            clientId: 'kafka-viewer-' + os.userInfo().username + '-' + String(Math.floor(Math.random() * 999999999)),
             brokers: this.brokers,
             connectionTimeout: 10000
         });
@@ -60,7 +60,7 @@ class KafkaProxy {
     }
 
     async subscribe(topic, offsets, isLoadMore) {
-        let groupId = 'kafka-viewer-' + os.userInfo().username + '-' + topic + (isLoadMore? '_loadmore_' + this.counter : '');
+        let groupId = 'kafka-viewer-' + os.userInfo().username + '-' + String(Math.floor(Math.random() * 999999) + '-' + String(Math.floor(Math.random() * 999999)));
         if (isLoadMore) {
             this.stopPos[groupId] = {};
             this.counter++;
