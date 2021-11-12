@@ -125,7 +125,7 @@
                                 </ng-container>
                             </td>
 
-                            <td *ngIf="column.isUserDefined" [style.font-size]="configurationService.config.fontSize" [className]="column.width? 'user width-' + column.width : 'user'">
+                            <td *ngIf="column.isUserDefined" [style.font-size.px]="configurationService.config.fontSize" [className]="column.width? 'user width-' + column.width : 'user'">
                                 {{ message.userValues[column.name] }}
                             </td>
 

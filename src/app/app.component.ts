@@ -1,4 +1,6 @@
 import {Component, enableProdMode} from '@angular/core';
+import {ElectronService, NgxElectronModule} from 'ngx-electron';
+
 
 enableProdMode();
 // setTheme();
@@ -10,5 +12,12 @@ enableProdMode();
 })
 export class AppComponent {
     public title = 'kafka-viewer';
+
+    constructor(private electronModule: ElectronService) {
+    }
+
+    ngOnInit() {
+        this.electronModule.isElectronApp? this.title = 'Electron' : 'not electron';
+    }
 }
 

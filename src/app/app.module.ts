@@ -4,7 +4,6 @@ import {NgModule} from '@angular/core';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatCardModule} from '@angular/material';
 import {TopbarComponent} from './topbar/topbar.component';
 import {ButtonComponent} from './button/button.component';
 import {ModalComponent} from './modal/modal.component';
@@ -15,6 +14,8 @@ import {MomentModule} from 'ngx-moment';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {ConfigurationService} from "./service/configuration.service";
 import {IpcService} from "./service/ipc.service";
+import { NgxElectronModule } from 'ngx-electron';
+
 
 @NgModule({
     declarations: [
@@ -28,10 +29,10 @@ import {IpcService} from "./service/ipc.service";
         BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
-        MatCardModule,
         FormsModule,
         MomentModule,
-        NgxJsonViewerModule
+        NgxJsonViewerModule,
+        NgxElectronModule
     ],
     providers: [
         KafkaService,

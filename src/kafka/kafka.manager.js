@@ -5,6 +5,8 @@ const fetch = require('node-fetch');
 
 class KafkaManager {
 
+    events = [];
+
     constructor(window) {
         this.connections = {};
         this.window = window;
@@ -26,7 +28,7 @@ class KafkaManager {
         this.connections[name] = {
             proxy: proxy
         };
-        this.window.webContents.send('connected', name);
+        this.storeEvent('connected', name);
         this.getTopics(name);
     }
 
@@ -40,12 +42,12 @@ class KafkaManager {
         let offsets = await this.connections[name].proxy.getOffsets(topic);
         offsets.sort((a, b) => a.partition === b.partition? 0: a.partition < b.partition? -1 : 1);
         console.log('offsets', topic, offsets);
-        this.window.webContents.send('offsets', { name, topic, offsets });
+        this.storeEvent('offsets', { name, topic, offsets });
     }
 
     async getTopics(name) {
         let topics = await this.connections[name].proxy.getTopics();
-        this.window.webContents.send('topics', { name, topics });
+        this.storeEvent('topics', { name, topics });
     }
 
     async subscribe(name, topic, offsets, isLoadMore) {
@@ -66,7 +68,7 @@ class KafkaManager {
         for (let name of Object.keys(this.connections)) {
             let messages = await this.connections[name].proxy.offloadMessages();
             if (messages && messages.length > 0) {
-                this.window.webContents.send('messages', { name, messages });
+                this.storeEvent('messages', { name, messages });
             }
         }
     }
@@ -104,6 +106,14 @@ class KafkaManager {
         } catch (e) {
         }
         return false;
+    }
+
+    storeEvent(type, data) {
+        this.events.push({ type, data});
+    }
+
+    getEvents() {
+        return this.events.splice(0);
     }
 
 }
