@@ -299,3 +299,12 @@ div.filter.active input {
 .dark-theme div.filter input:focus, .dark-theme div.filter input:hover {
     background-color: #333333;
 }
+
+#menu-publish {
+    padding-right: 20px;
+    color: #333;
+}
+
+#menu-publish a:hover {
+    color: blue;
+}

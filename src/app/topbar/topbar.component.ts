@@ -30,12 +30,15 @@ export class TopbarComponent {
     } = {};
 
     public publishDetails: {
+        isVisible: boolean,
         connection?: KafkaConnection,
         topic?: Topic,
         key: string;
         headers: string;
         value: string;
+        topics?: { connection: KafkaConnection, topic: Topic }[]
     } = {
+        isVisible: false,
         key: null,
         headers: null,
         value: ''
@@ -107,11 +110,14 @@ export class TopbarComponent {
     }
 
     openPublishModal(connection: KafkaConnection, topic: Topic) {
+        this.publishDetails.isVisible = true;
         this.publishDetails.connection = connection;
         this.publishDetails.topic = topic;
     }
 
     publish() {
+        console.log(this.publishDetails.topic);
+        alert(JSON.stringify(this.publishDetails.topic));
         let headers;
         if (this.publishDetails.headers) {
             try {
@@ -126,7 +132,7 @@ export class TopbarComponent {
             headers: headers,
             value: this.publishDetails.value
         });
-        this.publishDetails.topic = null;
+        this.publishDetails.isVisible = null;
     }
 
     closeMenu(menu: string) {

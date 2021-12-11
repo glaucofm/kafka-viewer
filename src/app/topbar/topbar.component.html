@@ -119,7 +119,7 @@
                                                 </a>
                                             </td>
                                         </tr>
-                                        <ng-container  *ngIf="type == 'preferred' && areUnpreferredTopicsOpen(connection) && getTopics(connection, type == 'preferred').length > 0">
+                                        <ng-container *ngIf="type == 'preferred' && areUnpreferredTopicsOpen(connection) && getTopics(connection, type == 'preferred').length > 0">
                                             <tr>
                                                 <td></td>
                                                 <td style="color: silver; margin-left: 12px;">
@@ -133,7 +133,14 @@
                             </ng-container>
                         </table>
                     </div>
+                </div>
+            </li>
 
+            <li class="pure-menu-item" *ngIf="kafkaService.isAnythingConnected() && kafkaService.getNumOfTopics() > 0">
+                <div class="dropdown hover" id="menu-publish">
+                    <a (click)="openPublishModal(null, null)" class="publish">
+                        <i class="fas fa-share-square"></i>
+                    </a>
                 </div>
             </li>
 
@@ -255,23 +262,44 @@
 
 </div>
 
-<app-modal *ngIf="!!publishDetails.topic" [visible]="true" (closeModal)="publishDetails.topic = null" [width]="'900px'" [class.dark-theme]="configurationService.theme == 'dark'">
+<app-modal *ngIf="publishDetails.isVisible" [visible]="true" (closeModal)="publishDetails.isVisible = false" [width]="'900px'" [class.dark-theme]="configurationService.theme == 'dark'">
     <div title>
-        Publish message to topic {{ publishDetails.topic.name }} connection {{ publishDetails.connection.name }}
+        <ng-container *ngIf="publishDetails.connection">
+            Publish message to topic {{ publishDetails.topic.name }} connection {{ publishDetails.connection.name }}
+        </ng-container>
+        <ng-container *ngIf="!publishDetails.connection">
+            Publish message
+        </ng-container>
     </div>
     <div body>
         <form class="pure-form pure-form-stacked">
             <fieldset>
+                <ng-container *ngIf="!publishDetails.connection">
+                    <label for="topics">Topic</label>
+                    <select name="topics" id="topics" [(ngModel)]="publishDetails.topic"
+                            style="border: 1px solid silver; margin-bottom: 10px; width: 500px">
+                        <option [value]="null"></option>
+                        <ng-container *ngFor="let connection of kafkaService.activeConnections">
+                            <ng-container *ngFor="let topic of getTopics(connection, true)">
+                                <option [ngValue]="topic">{{ kafkaService.activeConnections.length > 1? connection.name : ""}} {{ topic.name }}</option>
+                            </ng-container>
+                        </ng-container>
+                    </select>
+                </ng-container>
                 <label for="key">Key</label>
                 <input id="key" name="key" type="text" class="pure-input-1" [(ngModel)]="publishDetails.key" placeholder="*Not mandatory">
                 <label for="headers">Headers (as json dict)</label>
                 <textarea id="headers" name="headers" class="pure-input-1" rows="3" [(ngModel)]="publishDetails.headers" placeholder='{ "key": "value" }'></textarea>
                 <label for="publish">Message body</label>
-                <textarea id="publish" name="publish" class="pure-input-1 publish" rows="30" [(ngModel)]="publishDetails.value"></textarea>
+                <div>
+                    <i class="far fa-caret-square-left"></i>
+                    <i class="far fa-caret-square-right"></i>
+                </div>
+                <textarea id="publish" name="publish" class="pure-input-1 publish" rows="15" [(ngModel)]="publishDetails.value"></textarea>
             </fieldset>
         </form>
     </div>
     <div footer>
-        <button type="button" class="pure-button pure-button-primary" (click)="publish()">Publish</button>
+        <button type="button" class="pure-button pure-button-primary" (click)="publish()" [disabled]="!publishDetails.topic">Publish</button>
     </div>
 </app-modal>
