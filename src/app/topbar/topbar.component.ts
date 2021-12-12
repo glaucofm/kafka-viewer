@@ -5,6 +5,7 @@ import {StorageService} from '../service/storage.service';
 import {MessageBoxComponent} from "../messagebox/message-box.component";
 import {EventService} from "../service/event.service";
 import {ConfigurationService} from "../service/configuration.service";
+import * as moment from "moment";
 
 @Component({
     selector: 'app-topbar',
@@ -21,6 +22,8 @@ export class TopbarComponent {
     public oldColumns: string = '';
     public filterText: string = '';
     public isFiltering: boolean;
+    public fontSize;
+    public topicQuery;
 
     public topicMenu: {
         [key: string]: {
@@ -36,12 +39,18 @@ export class TopbarComponent {
         key: string;
         headers: string;
         value: string;
-        topics?: { connection: KafkaConnection, topic: Topic }[]
+        topics?: { connection: KafkaConnection, topic: Topic }[];
+        messageIndex: number;
+        messageTime: string;
+        numOfMessages: number;
     } = {
         isVisible: false,
         key: null,
         headers: null,
-        value: ''
+        value: '',
+        messageIndex: -1,
+        numOfMessages: 0,
+        messageTime: undefined
     };
 
     constructor(kafkaService: KafkaService,
@@ -54,6 +63,7 @@ export class TopbarComponent {
         }
         setInterval(() => { this.closeTopics(); }, 1000);
         setInterval(() => { this.detectColumnsChanges(); }, 100);
+        this.fontSize = this.configurationService.config.fontSize;
     }
 
     closeTopics() {
@@ -112,12 +122,31 @@ export class TopbarComponent {
     openPublishModal(connection: KafkaConnection, topic: Topic) {
         this.publishDetails.isVisible = true;
         this.publishDetails.connection = connection;
-        this.publishDetails.topic = topic;
+        this.publishDetails.topic = topic? topic : this.publishDetails.topic;
+        let messages = StorageService.get("published-messages");
+        if (messages && messages.length > 0) {
+            this.publishDetails.messageIndex = this.publishDetails.messageIndex < 0? 0 : this.publishDetails.messageIndex;
+            this.publishDetails.value = messages[this.publishDetails.messageIndex].value;
+            this.publishDetails.messageTime = moment(messages[this.publishDetails.messageIndex].time).fromNow();
+            this.publishDetails.numOfMessages = messages.length;
+        }
+    }
+
+    nextPublishedMessage() {
+        let messages = StorageService.get("published-messages");
+        this.publishDetails.messageIndex++;
+        this.publishDetails.value = messages[this.publishDetails.messageIndex].value;
+        this.publishDetails.messageTime = moment(messages[this.publishDetails.messageIndex].time).fromNow();
+    }
+
+    previousPublishedMessage() {
+        let messages = StorageService.get("published-messages");
+        this.publishDetails.messageIndex--;
+        this.publishDetails.value = messages[this.publishDetails.messageIndex].value;
+        this.publishDetails.messageTime = moment(messages[this.publishDetails.messageIndex].time).fromNow();
     }
 
     publish() {
-        console.log(this.publishDetails.topic);
-        alert(JSON.stringify(this.publishDetails.topic));
         let headers;
         if (this.publishDetails.headers) {
             try {
@@ -126,6 +155,14 @@ export class TopbarComponent {
                 alert(e);
                 return;
             }
+        }
+        let messages = StorageService.get("published-messages");
+        if (!messages || messages.length == 0 || this.publishDetails.value != messages[0].value) {
+            messages = messages || [];
+            messages.unshift({ value: this.publishDetails.value, time: new Date().valueOf() })
+            this.publishDetails.numOfMessages = messages.length;
+            this.publishDetails.messageIndex = 0;
+            StorageService.save("published-messages", messages);
         }
         this.kafkaService.publish(this.publishDetails.topic, {
             key: this.publishDetails.key,
@@ -142,8 +179,10 @@ export class TopbarComponent {
         }, 200);
     }
 
-    getTopics(connection: KafkaConnection, preferred: boolean) {
-        return connection.topics.filter(x => preferred ? x.isPreferred : !x.isPreferred);
+    getTopics(connection: KafkaConnection, preferred: boolean, filter: string = undefined) {
+        return connection.topics
+            .filter(x => preferred ? x.isPreferred : !x.isPreferred)
+            .filter(x => !filter || x.name.toLowerCase().includes(filter.toLowerCase()));
     }
 
     areUnpreferredTopicsOpen(connection: KafkaConnection): boolean {
@@ -204,5 +243,15 @@ export class TopbarComponent {
         this.isFiltering = this.filterText.length > 0;
         console.log(this.isFiltering);
         EventService.emitter.emit({ type: EventType.SET_FILTER, data: this.filterText });
+    }
+
+    setFontSize() {
+        this.configurationService.config.fontSize = this.fontSize;
+    }
+
+    removePreferredTopic(connection: KafkaConnection, topic: Topic) {
+        topic.isPreferred = false;
+        connection.preferredTopics = connection.preferredTopics.filter(x => x != topic.name);
+        this.kafkaService.saveConnection(connection);
     }
 }

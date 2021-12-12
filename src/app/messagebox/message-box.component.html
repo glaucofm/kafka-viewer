@@ -71,7 +71,7 @@
                                 </ng-container>
                             </td>
 
-                            <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200" [style.font-size]="configurationService.config.fontSize">
+                            <td class="payload" *ngSwitchCase="'Payload'" [style.max-width.px]="200" [style.font-size.px]="configurationService.config.fontSize">
                                 <ng-container *ngIf="!message.json && !message.formattedJson && !message.metadataOpen">
                                     <span class="show-json" (click)="viewJSON(message)">
                                         JSON

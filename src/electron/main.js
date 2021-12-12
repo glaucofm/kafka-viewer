@@ -12,7 +12,7 @@ function createWindow () {
         title: 'Kafka Viewer',
         webPreferences: {
             webSecurity: false,
-            nodeIntegration: true
+            nodeIntegration: false
         }
     });
 

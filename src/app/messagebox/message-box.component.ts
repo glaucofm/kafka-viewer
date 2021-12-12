@@ -192,9 +192,6 @@ export class MessageBoxComponent {
                     row.userValues[column.name] = header? header[1] : '';
                 } else {
                     let values = this.extractColumnValue(row, column);
-                    if (column.jsonPath == '$.messageAction') {
-                        console.log(row, values, column);
-                    }
                     row.userValues[column.name] = values.join(", ");
                 }
             }
@@ -235,7 +232,8 @@ export class MessageBoxComponent {
         try {
             return jsonPath.query(message.parsedJson, column.jsonPath);
         } catch (e) {
-            return '';
+            console.log(e);
+            return [];
         }
     }
 

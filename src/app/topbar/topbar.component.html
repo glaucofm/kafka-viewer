@@ -102,33 +102,34 @@
                                         </table>
                                     </td>
                                 </tr>
-                                <ng-container *ngFor="let type of ['preferred', 'unpreferred']">
-                                    <ng-container  *ngIf="type == 'preferred' || areUnpreferredTopicsOpen(connection)">
-                                        <tr *ngFor="let topic of getTopics(connection, type == 'preferred')" class="{{ topic.isSelected? 'selected' : 'unselected' }}">
-                                            <td style="min-width: 20px">
-                                                &nbsp;
-                                            </td>
-                                            <td>
-                                                <a (click)="toggleTopic(connection, topic)" class="topic-name">
-                                                    {{ topic.name }}
-                                                </a>
-                                            </td>
-                                            <td>
-                                                <a (click)="openPublishModal(connection, topic)" class="publish">
-                                                    <i class="fas fa-share-square"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <ng-container *ngIf="type == 'preferred' && areUnpreferredTopicsOpen(connection) && getTopics(connection, type == 'preferred').length > 0">
-                                            <tr>
-                                                <td></td>
-                                                <td style="color: silver; margin-left: 12px;">
-                                                    <hr size="1" noshade>
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                        </ng-container>
-                                    </ng-container>
+                                <tr *ngFor="let topic of getTopics(connection, true)" class="selected" [class.connected]="topic.isSelected">
+                                    <td style="min-width: 20px">
+                                        &nbsp;
+                                    </td>
+                                    <td style="min-width: 250px">
+                                        <a (click)="toggleTopic(connection, topic)" class="topic-name">
+                                            {{ topic.name }}
+                                        </a>
+                                    </td>
+                                    <a *ngIf="!topic.isSelected" (click)="removePreferredTopic(connection, topic)" class="publish">
+                                        <i class="far fa-minus-square"></i>
+                                    </a>
+                                </tr>
+                                <ng-container *ngIf="areUnpreferredTopicsOpen(connection) && getTopics(connection, false).length > 0">
+                                    <tr>
+                                        <td colspan="3" style="padding: 0 10px;">
+                                            <input type="text" class="pure-input-1" [(ngModel)]="topicQuery" style="min-width: 300px" placeholder="search...">
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let topic of getTopics(connection, false, topicQuery)" class="unselected">
+                                        <td></td>
+                                        <td style="min-width: 250px">
+                                            <a (click)="toggleTopic(connection, topic)" class="topic-name">
+                                                {{ topic.name }}
+                                            </a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
                                 </ng-container>
                             </ng-container>
                         </table>
@@ -197,7 +198,7 @@
                                 </tr>
                             </ng-container>
                             <tr class="add-column">
-                                <td>
+                                <td colspan="3">
                                     <a (click)="addColumn()"><i class="fas fa-plus"></i> Add column</a>
                                 </td>
                             </tr>
@@ -243,7 +244,8 @@
                         <div class="row">
                             <div>Messages table font size</div>
                             <div>
-                                <input type="text" class="pure-input-1" [(ngModel)]="configurationService.config.fontSize">
+                                <input type="text" class="pure-input-1" [(ngModel)]="fontSize">
+                                <button type="button" class="pure-button save-font" (click)="setFontSize()">Save</button>
                             </div>
                         </div>
                     </div>
@@ -254,6 +256,7 @@
                 <div class="filter" [class.active]="isFiltering">
                     <i class="fa fa-search"></i>
                     <input id="filter" name="filter" type="text" class="pure-input-1" [(ngModel)]="filterText" placeholder="" (keyup.enter)="setFilter()">
+
                 </div>
             </li>
 
@@ -290,10 +293,13 @@
                 <input id="key" name="key" type="text" class="pure-input-1" [(ngModel)]="publishDetails.key" placeholder="*Not mandatory">
                 <label for="headers">Headers (as json dict)</label>
                 <textarea id="headers" name="headers" class="pure-input-1" rows="3" [(ngModel)]="publishDetails.headers" placeholder='{ "key": "value" }'></textarea>
-                <label for="publish">Message body</label>
-                <div>
-                    <i class="far fa-caret-square-left"></i>
-                    <i class="far fa-caret-square-right"></i>
+                <label for="publish" style="display: inline-block; margin-top: 10px; padding-right: 10px">Message body</label>
+                <div *ngIf="publishDetails.messageIndex > 0" class="prev-next-btn" (click)="previousPublishedMessage()">
+                    <i class="fas fa-caret-left"></i>
+                </div>
+                <span *ngIf="publishDetails.messageIndex >= 0" style="font-size: 14px; padding: 0 2px; color: silver">{{ publishDetails.messageTime }}</span>
+                <div *ngIf="publishDetails.messageIndex < publishDetails.numOfMessages - 1" class="prev-next-btn" (click)="nextPublishedMessage()">
+                    <i class="fas fa-caret-right"></i>
                 </div>
                 <textarea id="publish" name="publish" class="pure-input-1 publish" rows="15" [(ngModel)]="publishDetails.value"></textarea>
             </fieldset>

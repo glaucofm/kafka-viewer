@@ -79,8 +79,9 @@ div.dropdown-connections a.connected:hover {
     background-color: transparent;
 }
 
-table.topic-list tr.selected a.topic-name {
+table.topic-list tr.connected a.topic-name {
     color: blue;
+    font-weight: bold;
 }
 
 table.topic-list tr.unselected a.topic-name:hover {
@@ -88,7 +89,6 @@ table.topic-list tr.unselected a.topic-name:hover {
 }
 
 .dark-theme table.topic-list tr.selected a.topic-name {
-    color: deepskyblue;
 }
 
 .dark-theme table.topic-list tr.unselected a.topic-name:hover {
@@ -305,6 +305,76 @@ div.filter.active input {
     color: #333;
 }
 
+.dark-theme #menu-publish {
+    color: #ccc;
+}
+
 #menu-publish a:hover {
     color: blue;
+}
+
+#menu-publish:hover {
+    background-color: inherit;
+}
+
+.dark-theme #menu-publish a:hover {
+    color: deepskyblue;
+}
+
+.prev-next-btn {
+    display: inline-block;
+    padding: 0px 10px;
+    border: 1px solid transparent;
+    margin: 10px 6px -6px 6px;
+    background-color: #F0F0F0;
+    font-size: 16px;
+}
+
+.prev-next-btn:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+.save-font {
+    padding: 3px 7px;
+    margin-left: 5px;
+    margin-top: -2px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+}
+
+.save-font:hover {
+    background-color: #e6e6e6;
+    color: blue;
+    background-image: none;
+    border: 1px solid silver;
+}
+
+.dark-theme .save-font {
+    border: 1px solid gray;
+    background-color: transparent;
+    color: silver;
+}
+
+.dark-theme .save-font:hover {
+    background-color: #333333;
+    color: deepskyblue;
+}
+
+.pure-button.no-form {
+    padding: 4px 8px;
+    color: blue;
+    border-radius: 3px;
+}
+
+.pure-button.no-form:hover {
+    background-color: blue;
+    color: white;
+    background-image: none;
+}
+
+.dark-theme select {
+    background-color: #222;
+    color: #ccc;
+    border: 1px solid #888;
 }
